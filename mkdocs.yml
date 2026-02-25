@@ -26,12 +26,17 @@ theme:
     - content.code.copy
     - content.code.annotate
     - search.highlight
+  favicon: assets/icons/favicon.png
   icon:
     repo: fontawesome/brands/github
+    logo: material/robot-happy-outline
   custom_dir: overrides
 
 extra_css:
   - stylesheets/rtl.css
+
+extra:
+  manifest: manifest.webmanifest
 
 markdown_extensions:
   - admonition
