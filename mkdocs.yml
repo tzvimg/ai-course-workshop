@@ -56,7 +56,7 @@ nav:
     - "1. יסודות": modules/01-foundations.md
     - "2. Prompt Engineering": modules/02-prompt-engineering.md
     - "3. תהליכי עבודה עם AI": modules/03-ai-workflows.md
-    - "4. Agentic Coding": modules/04-agentic-coding.md
+    - "4. בניית Coding Agent": modules/04-agentic-coding.md
     - "5. בניית פיצ׳רים עם AI": modules/05-building-ai-features.md
     - "6. דפוסים מתקדמים": modules/06-advanced-patterns.md
     - "7. פרויקט מסכם": modules/07-capstone.md
