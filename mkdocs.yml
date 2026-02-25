@@ -27,9 +27,9 @@ theme:
     - content.code.annotate
     - search.highlight
   favicon: assets/icons/favicon.png
+  logo: assets/icons/icon.svg
   icon:
     repo: fontawesome/brands/github
-    logo: material/robot-happy-outline
   custom_dir: overrides
 
 extra_css:
