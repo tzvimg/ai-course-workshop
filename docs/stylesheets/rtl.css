@@ -1,0 +1,48 @@
+/* RTL for all content except code blocks */
+body,
+.md-content,
+.md-nav,
+.md-header,
+.md-footer,
+.md-sidebar {
+  direction: rtl;
+  text-align: right;
+}
+
+/* LTR for code blocks and inline code */
+pre,
+code,
+.highlight,
+.codehilite,
+.md-typeset pre,
+.md-typeset code {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Ensure code blocks are fully LTR */
+.md-typeset pre > code {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Admonitions: keep icon on the right */
+.md-typeset .admonition,
+.md-typeset details {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Lists RTL */
+.md-typeset ul,
+.md-typeset ol {
+  direction: rtl;
+}
+
+/* Blockquotes */
+.md-typeset blockquote {
+  border-right: 0.2rem solid var(--md-accent-fg-color);
+  border-left: none;
+  padding-right: 0.6rem;
+  padding-left: 0;
+}

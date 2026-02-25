@@ -1,27 +1,27 @@
-# Module 2: Prompt Engineering for Code
+# מודול 2: Prompt Engineering לקוד
 
-!!! info "Duration"
-    30 min lecture + 60 min hands-on + 15 min discussion
+!!! info "משך"
+    30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
 
-## Learning Objectives
+## מטרות למידה
 
-By the end of this module, you will:
+בסוף המודול הזה, תוכלו:
 
-- Write prompts that produce production-quality code on the first try
-- Use few-shot examples, personas, and chain-of-thought effectively
-- Recognize and avoid common prompting anti-patterns
+- לכתוב prompts שמייצרים קוד ברמת production מהניסיון הראשון
+- להשתמש ב-few-shot examples, personas ו-chain-of-thought בצורה יעילה
+- לזהות ולהימנע מ-anti-patterns נפוצים ב-prompting
 
-## Topics
+## נושאים
 
-### Writing Effective Prompts
+### כתיבת Prompts יעילים
 
-- **Be specific:** "Add input validation" vs. "Add Zod validation for email format, required name field, and optional phone with E.164 format"
-- **Provide context:** Language, framework, existing patterns, constraints
-- **State constraints:** Performance requirements, style guides, no external deps
+- **היו ספציפיים:** "תוסיפו input validation" לעומת "תוסיפו Zod validation לפורמט email, שדה name חובה, ו-phone אופציונלי בפורמט E.164"
+- **ספקו context:** שפה, framework, דפוסים קיימים, אילוצים
+- **ציינו אילוצים:** דרישות ביצועים, style guides, בלי dependencies חיצוניים
 
 ### Few-Shot Examples
 
-Show the AI what you want by example:
+הראו ל-AI מה אתם רוצים באמצעות דוגמה:
 
 ```
 Here's how we write API handlers in this project:
@@ -37,9 +37,9 @@ Now write a similar handler for DELETE /users/:id that also
 checks authorization.
 ```
 
-### Chain-of-Thought for Complex Problems
+### Chain-of-Thought לבעיות מורכבות
 
-Ask the AI to think step by step:
+בקשו מה-AI לחשוב צעד אחר צעד:
 
 ```
 I need to migrate our authentication from JWT to session-based auth.
@@ -53,33 +53,33 @@ Before writing code, please:
 
 ### Anti-Patterns
 
-- **Too vague:** "Make it better"
-- **Too much at once:** Asking for an entire app in one prompt
-- **No context:** Prompting without specifying language, framework, or patterns
-- **Ignoring errors:** Not feeding error messages back to the AI
+- **מעורפל מדי:** "Make it better"
+- **יותר מדי בבת אחת:** לבקש אפליקציה שלמה ב-prompt אחד
+- **בלי context:** prompting בלי לציין שפה, framework או דפוסים
+- **התעלמות משגיאות:** לא להזין הודעות שגיאה חזרה ל-AI
 
-## Hands-On Exercise
+## תרגיל מעשי
 
-### Prompt Refinement Challenge
+### אתגר שיפור Prompts
 
-**Start with this vague requirement:**
+**התחילו עם דרישה מעורפלת:**
 
 > "Build a user registration system"
 
-**Round 1:** Send this as-is to an AI tool. Note what you get.
+**סיבוב 1:** שלחו את זה כמו שזה לכלי AI. רשמו מה קיבלתם.
 
-**Round 2:** Add specifics — language, framework, validation rules, database.
+**סיבוב 2:** הוסיפו פרטים — שפה, framework, כללי validation, database.
 
-**Round 3:** Add project context — existing patterns, file structure, coding style.
+**סיבוב 3:** הוסיפו הקשר פרויקט — דפוסים קיימים, מבנה קבצים, סגנון קוד.
 
-**Round 4:** Add constraints — security requirements, error handling, tests.
+**סיבוב 4:** הוסיפו אילוצים — דרישות אבטחה, טיפול בשגיאות, בדיקות.
 
-**Compare the outputs.** How much did each refinement improve the result?
+**השוו את הפלטים.** כמה כל שיפור שיפר את התוצאה?
 
-## Key Takeaways
+## נקודות מפתח
 
-- Prompting is a skill — the difference between a vague and precise prompt is massive
-- Always provide context: language, framework, existing patterns
-- Use few-shot examples when you want consistent style
-- Break complex tasks into steps with chain-of-thought
-- Feed errors back — AI tools learn from the conversation
+- Prompting הוא מיומנות — ההבדל בין prompt מעורפל למדויק הוא עצום
+- תמיד ספקו context: שפה, framework, דפוסים קיימים
+- השתמשו ב-few-shot examples כשאתם רוצים סגנון עקבי
+- פרקו משימות מורכבות לצעדים עם chain-of-thought
+- הזינו שגיאות חזרה — כלי AI לומדים מהשיחה

@@ -1,22 +1,24 @@
-site_name: "AI for Software Engineers"
-site_description: "A practical workshop teaching developers how to leverage AI for software engineering"
+site_name: "AI להנדסת תוכנה"
+site_description: "סדנה מעשית שמלמדת מפתחים איך למנף כלי AI להנדסת תוכנה"
 site_url: ""
 
 theme:
   name: material
+  language: he
+  direction: rtl
   palette:
     - scheme: default
       primary: deep purple
       accent: amber
       toggle:
         icon: material/brightness-7
-        name: Switch to dark mode
+        name: מצב כהה
     - scheme: slate
       primary: deep purple
       accent: amber
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: מצב בהיר
   features:
     - navigation.sections
     - navigation.expand
@@ -26,6 +28,10 @@ theme:
     - search.highlight
   icon:
     repo: fontawesome/brands/github
+  custom_dir: overrides
+
+extra_css:
+  - stylesheets/rtl.css
 
 markdown_extensions:
   - admonition
@@ -45,12 +51,12 @@ markdown_extensions:
       permalink: true
 
 nav:
-  - Home: index.md
-  - Modules:
-    - "1. Foundations": modules/01-foundations.md
+  - דף הבית: index.md
+  - מודולים:
+    - "1. יסודות": modules/01-foundations.md
     - "2. Prompt Engineering": modules/02-prompt-engineering.md
-    - "3. AI-Assisted Workflows": modules/03-ai-workflows.md
+    - "3. תהליכי עבודה עם AI": modules/03-ai-workflows.md
     - "4. Agentic Coding": modules/04-agentic-coding.md
-    - "5. Building AI Features": modules/05-building-ai-features.md
-    - "6. Advanced Patterns": modules/06-advanced-patterns.md
-    - "7. Capstone Project": modules/07-capstone.md
+    - "5. בניית פיצ׳רים עם AI": modules/05-building-ai-features.md
+    - "6. דפוסים מתקדמים": modules/06-advanced-patterns.md
+    - "7. פרויקט מסכם": modules/07-capstone.md

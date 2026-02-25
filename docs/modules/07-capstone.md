@@ -1,32 +1,32 @@
-# Module 7: Capstone Project
+# מודול 7: פרויקט מסכם
 
-!!! info "Duration"
-    Extended session — 2+ hours
+!!! info "משך"
+    סשן מורחב — 2+ שעות
 
-## Overview
+## סקירה
 
-Build a real tool or feature using everything you've learned throughout the workshop.
+בנו כלי או פיצ׳ר אמיתי עם כל מה שלמדתם במהלך הסדנה.
 
-## Guidelines
+## הנחיות
 
-1. **Choose a problem** from your actual work
-2. **Design** the AI integration approach
-3. **Implement** using the patterns and tools from previous modules
-4. **Test** your solution thoroughly
-5. **Present** to the group and get feedback
+1. **בחרו בעיה** מהעבודה האמיתית שלכם
+2. **תכננו** את גישת השילוב עם AI
+3. **ממשו** בעזרת הדפוסים והכלים מהמודולים הקודמים
+4. **בדקו** את הפתרון שלכם ביסודיות
+5. **הציגו** לקבוצה וקבלו משוב
 
-## Project Ideas
+## רעיונות לפרויקטים
 
-- AI-powered code review bot for your team's PRs
-- Internal documentation search with RAG
-- Automated test generator for your codebase
-- Intelligent error log analyzer
-- Natural language database query interface
-- AI-assisted onboarding tool for new developers
+- Bot ל-code review מבוסס AI ל-PRs של הצוות
+- חיפוש תיעוד פנימי עם RAG
+- מחולל בדיקות אוטומטי ל-codebase שלכם
+- מנתח error logs חכם
+- ממשק natural language לשאילתות database
+- כלי onboarding מבוסס AI למפתחים חדשים
 
-## Evaluation Criteria
+## קריטריונים להערכה
 
-- **Practicality** — Does it solve a real problem?
-- **AI Integration** — Is AI used effectively (not just for the sake of it)?
-- **Quality** — Is the code production-ready?
-- **Presentation** — Can you explain your approach clearly?
+- **פרקטיות** — האם זה פותר בעיה אמיתית?
+- **שילוב AI** — האם ה-AI מנוצל בצורה יעילה (ולא רק בשביל לסמן וי)?
+- **איכות** — האם הקוד מוכן ל-production?
+- **הצגה** — האם אתם יכולים להסביר את הגישה שלכם בצורה ברורה?

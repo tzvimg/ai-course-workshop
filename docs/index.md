@@ -1,38 +1,36 @@
-# AI for Software Engineers
+# AI להנדסת תוכנה
 
-A practical, hands-on workshop teaching developers how to effectively leverage AI tools throughout the software development lifecycle. **No fluff — just patterns that work.**
+סדנה מעשית ופרקטית שמלמדת מפתחים איך למנף כלי AI לאורך כל מחזור חיי הפיתוח. **בלי בלופים — רק דפוסים שעובדים.**
 
 ---
 
-## Who is this for?
+## למי הסדנה מיועדת?
 
-Software developers (junior to senior) who want to 10x their productivity with AI. No ML/AI background needed — just bring your coding experience.
+מפתחי תוכנה (מ-junior עד senior) שרוצים להכפיל את הפרודוקטיביות שלהם עם AI. לא צריך רקע ב-ML או AI — רק ניסיון בפיתוח.
 
-## What you'll learn
+## מה תלמדו
 
-- **Foundations** — How AI coding tools actually work under the hood
-- **Prompt Engineering** — Writing prompts that produce production-quality code
-- **AI Workflows** — Code review, testing, refactoring, and documentation with AI
-- **Agentic Coding** — Using Claude Code, Cursor, and Copilot as pair programmers
-- **Building AI Features** — Integrating LLMs into your own applications
-- **Advanced Patterns** — Production concerns, security, and CI/CD integration
-- **Capstone** — Build a real tool using everything you've learned
+- **יסודות** — איך כלי AI לכתיבת קוד באמת עובדים מתחת למכסה
+- **Prompt Engineering** — כתיבת prompts שמייצרים קוד ברמת production
+- **תהליכי עבודה עם AI** — Code review, בדיקות, refactoring ותיעוד עם AI
+- **Agentic Coding** — שימוש ב-Claude Code, Cursor ו-Copilot כ-pair programmers
+- **בניית פיצ׳רים עם AI** — שילוב LLMs באפליקציות שלכם
+- **דפוסים מתקדמים** — שיקולי production, אבטחה ושילוב ב-CI/CD
+- **פרויקט מסכם** — בנו כלי אמיתי עם כל מה שלמדתם
 
-## Workshop Format
+## פורמט הסדנה
 
-| | 2-Day Intensive | 7-Week Series |
-|---|---|---|
-| **Schedule** | Full days, all modules | 1 module per week |
-| **Each module** | 30 min lecture + 60 min hands-on + 15 min discussion | Same |
-| **Best for** | Teams, bootcamps | Ongoing learning |
+- **סדנה אינטנסיבית (יומיים)** — כל המודולים ביומיים מלאים, מתאים לצוותים ו-bootcamps
+- **סדרה שבועית (7 שבועות)** — מודול אחד בשבוע, מתאים ללמידה מתמשכת
+- **כל מודול** — 30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
 
-## Prerequisites
+## דרישות מוקדמות
 
-- Basic programming experience in any language
-- A laptop with your preferred IDE
-- API keys for Claude and/or OpenAI
-- Git installed
+- ניסיון בסיסי בתכנות בשפה כלשהי
+- מחשב נייד עם IDE מועדף
+- API keys ל-Claude ו/או OpenAI
+- Git מותקן
 
-## Get Started
+## בואו נתחיל
 
-Head to [Module 1: Foundations](modules/01-foundations.md) to begin.
+עברו ל[מודול 1: יסודות](modules/01-foundations.md) כדי להתחיל.

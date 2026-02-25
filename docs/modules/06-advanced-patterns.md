@@ -1,22 +1,22 @@
-# Module 6: Advanced Patterns & Production Concerns
+# מודול 6: דפוסים מתקדמים ושיקולי Production
 
-!!! info "Duration"
-    30 min lecture + 60 min hands-on + 15 min discussion
+!!! info "משך"
+    30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
 
-## Learning Objectives
+## מטרות למידה
 
-- Optimize AI usage for production (caching, evaluation, cost)
-- Handle hallucinations and errors gracefully
-- Secure your AI integrations against prompt injection and data leakage
+- לייעל שימוש ב-AI ל-production (caching, evaluation, עלויות)
+- לטפל ב-hallucinations ובשגיאות בצורה חכמה
+- לאבטח את השילובים שלכם מפני prompt injection ודליפת מידע
 
-## Topics
+## נושאים
 
-*Content to be developed — send your ideas and notes!*
+*התוכן בפיתוח — שלחו את הרעיונות וההערות שלכם!*
 
-## Hands-On Exercise
+## תרגיל מעשי
 
-Add AI-powered code review to a CI pipeline.
+הוסיפו AI-powered code review ל-CI pipeline.
 
-## Key Takeaways
+## נקודות מפתח
 
-- Coming soon
+- בקרוב

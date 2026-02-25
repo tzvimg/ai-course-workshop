@@ -1,22 +1,22 @@
-# Module 3: AI-Assisted Development Workflows
+# מודול 3: תהליכי עבודה עם AI
 
-!!! info "Duration"
-    30 min lecture + 60 min hands-on + 15 min discussion
+!!! info "משך"
+    30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
 
-## Learning Objectives
+## מטרות למידה
 
-- Integrate AI into your daily development workflows
-- Use AI for code review, testing, refactoring, and documentation
-- Know when AI adds value and when manual work is better
+- לשלב AI בתהליכי הפיתוח היומיומיים שלכם
+- להשתמש ב-AI ל-code review, בדיקות, refactoring ותיעוד
+- לדעת מתי AI מוסיף ערך ומתי עבודה ידנית עדיפה
 
-## Topics
+## נושאים
 
-*Content to be developed — send your ideas and notes!*
+*התוכן בפיתוח — שלחו את הרעיונות וההערות שלכם!*
 
-## Hands-On Exercise
+## תרגיל מעשי
 
-Take a legacy codebase and use AI to add tests, refactor, and document it.
+קחו codebase ישן והשתמשו ב-AI כדי להוסיף בדיקות, לעשות refactoring ולתעד אותו.
 
-## Key Takeaways
+## נקודות מפתח
 
-- Coming soon
+- בקרוב

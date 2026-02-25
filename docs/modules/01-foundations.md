@@ -1,77 +1,77 @@
-# Module 1: Foundations — How AI Coding Tools Actually Work
+# מודול 1: יסודות — איך כלי AI לקוד באמת עובדים
 
-!!! info "Duration"
-    30 min lecture + 60 min hands-on + 15 min discussion
+!!! info "משך"
+    30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
 
-## Learning Objectives
+## מטרות למידה
 
-By the end of this module, you will:
+בסוף המודול הזה, תוכלו:
 
-- Understand how LLMs generate code at a high level
-- Know the key constraints (tokens, context windows) and how they affect your work
-- Have a mental model for when AI helps and when it doesn't
-- Be familiar with the major AI coding tools landscape
+- להבין ברמה גבוהה איך LLMs מייצרים קוד
+- להכיר את האילוצים המרכזיים (tokens, context windows) ואיך הם משפיעים על העבודה שלכם
+- לבנות מודל מנטלי למתי AI עוזר ומתי לא
+- להכיר את הנוף של כלי AI לכתיבת קוד
 
-## Topics
+## נושאים
 
-### How LLMs Understand and Generate Code
+### איך LLMs מבינים ומייצרים קוד
 
-- Tokens, not characters — how code gets broken down
-- Next-token prediction and why it matters for code quality
-- Training data: what the model has "seen"
+- Tokens, לא תווים — איך קוד מפורק ליחידות
+- Next-token prediction ולמה זה חשוב לאיכות הקוד
+- Training data: מה המודל "ראה"
 
-### Token Limits and Context Windows
+### Token Limits ו-Context Windows
 
-- What is a context window and why you hit limits
-- How to work within constraints effectively
-- Long context vs. short context strategies
+- מהו context window ולמה אתם נתקלים במגבלות
+- איך לעבוד בצורה יעילה בתוך האילוצים
+- אסטרטגיות ל-long context לעומת short context
 
-### The AI Coding Tools Landscape
+### הנוף של כלי AI לקוד
 
 - **Chat interfaces:** ChatGPT, Claude.ai
 - **IDE integrations:** GitHub Copilot, Cursor, Windsurf
 - **CLI agents:** Claude Code, Aider, OpenAI Codex
-- Strengths and trade-offs of each category
+- יתרונות וחסרונות של כל קטגוריה
 
-### Mental Model
+### מודל מנטלי
 
-> Think of AI as a **junior developer with perfect memory but no judgment**. It can write any pattern it's seen before, but it can't tell you if it's the *right* pattern for your situation.
+> חשבו על AI כ**מפתח ג׳וניור עם זיכרון מושלם אבל בלי שיקול דעת**. הוא יכול לכתוב כל pattern שהוא ראה בעבר, אבל הוא לא יכול לומר לכם אם זה ה-pattern ה*נכון* למצב שלכם.
 
-## Hands-On Exercise
+## תרגיל מעשי
 
-### Tool Comparison Challenge
+### אתגר השוואת כלים
 
-**Goal:** Compare 3 different AI tools on the same coding task.
+**מטרה:** השוו 3 כלי AI שונים על אותה משימת קוד.
 
-**Task:** Ask each tool to build a REST API endpoint that:
+**משימה:** בקשו מכל כלי לבנות REST API endpoint שעושה את הדברים הבאים:
 
-1. Accepts a JSON payload with `name` and `email`
-2. Validates the input
-3. Returns appropriate error messages
-4. Follows best practices for your language of choice
+1. מקבל JSON payload עם `name` ו-`email`
+2. מבצע validation לקלט
+3. מחזיר הודעות שגיאה מתאימות
+4. עוקב אחרי best practices בשפה שבחרתם
 
-**Try it with:**
+**נסו עם:**
 
-- A chat interface (Claude.ai or ChatGPT)
-- An IDE tool (Copilot or Cursor)
-- A CLI agent (Claude Code or Aider)
+- Chat interface (Claude.ai או ChatGPT)
+- כלי IDE (Copilot או Cursor)
+- CLI agent (Claude Code או Aider)
 
-**Evaluate:**
+**הערכה:**
 
-- Which produced the most complete code?
-- Which required the least back-and-forth?
-- Which best understood your project context?
-- How did error handling differ?
+- מי ייצר את הקוד השלם ביותר?
+- מי דרש הכי פחות הלוך-חזור?
+- מי הבין הכי טוב את ההקשר של הפרויקט?
+- איך טיפול בשגיאות השתנה בין הכלים?
 
-## Discussion Questions
+## שאלות לדיון
 
-1. When would you choose a chat interface vs. an IDE agent vs. a CLI agent?
-2. What surprised you about the differences in output?
-3. Where did the AI tools struggle, and why do you think that is?
+1. מתי תבחרו chat interface לעומת IDE agent לעומת CLI agent?
+2. מה הפתיע אתכם בהבדלים בין הפלטים?
+3. איפה כלי ה-AI התקשו, ולמה לדעתכם?
 
-## Key Takeaways
+## נקודות מפתח
 
-- AI tools are powerful but have fundamental constraints you need to understand
-- Different tools excel at different tasks — there's no single best option
-- Context is king: the more context you provide, the better the output
-- Always review AI output critically — it's a starting point, not a final answer
+- כלי AI הם חזקים אבל יש להם אילוצים בסיסיים שחשוב להבין
+- כלים שונים מצטיינים במשימות שונות — אין אופציה אחת שהיא הטובה ביותר
+- Context הוא המלך: ככל שתספקו יותר הקשר, כך הפלט יהיה טוב יותר
+- תמיד בדקו את הפלט של AI בצורה ביקורתית — זו נקודת התחלה, לא תשובה סופית

@@ -1,22 +1,22 @@
-# Module 4: Agentic Coding — AI as Your Pair Programmer
+# מודול 4: Agentic Coding — AI כ-Pair Programmer שלכם
 
-!!! info "Duration"
-    30 min lecture + 60 min hands-on + 15 min discussion
+!!! info "משך"
+    30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
 
-## Learning Objectives
+## מטרות למידה
 
-- Understand the difference between chat AI and agentic AI coding tools
-- Set up effective project context for AI agents
-- Delegate multi-step tasks to AI agents effectively
+- להבין את ההבדל בין chat AI לכלי agentic AI לקוד
+- להגדיר project context יעיל ל-AI agents
+- להאציל משימות מרובות שלבים ל-AI agents בצורה יעילה
 
-## Topics
+## נושאים
 
-*Content to be developed — send your ideas and notes!*
+*התוכן בפיתוח — שלחו את הרעיונות וההערות שלכם!*
 
-## Hands-On Exercise
+## תרגיל מעשי
 
-Use an agentic tool to implement a feature end-to-end, from spec to tests to PR.
+השתמשו בכלי agentic כדי לממש פיצ׳ר end-to-end, מ-spec דרך בדיקות ועד PR.
 
-## Key Takeaways
+## נקודות מפתח
 
-- Coming soon
+- בקרוב

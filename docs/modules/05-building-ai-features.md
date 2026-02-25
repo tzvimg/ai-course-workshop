@@ -1,22 +1,22 @@
-# Module 5: Building AI-Powered Features
+# מודול 5: בניית פיצ׳רים מבוססי AI
 
-!!! info "Duration"
-    30 min lecture + 60 min hands-on + 15 min discussion
+!!! info "משך"
+    30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
 
-## Learning Objectives
+## מטרות למידה
 
-- Integrate LLM APIs into your applications
-- Understand RAG, structured outputs, and function calling
-- Handle streaming responses and manage costs
+- לשלב LLM APIs באפליקציות שלכם
+- להבין RAG, structured outputs ו-function calling
+- לטפל ב-streaming responses ולנהל עלויות
 
-## Topics
+## נושאים
 
-*Content to be developed — send your ideas and notes!*
+*התוכן בפיתוח — שלחו את הרעיונות וההערות שלכם!*
 
-## Hands-On Exercise
+## תרגיל מעשי
 
-Build a simple AI-powered feature (e.g., smart search, content summarizer, or code explainer).
+בנו פיצ׳ר פשוט מבוסס AI (למשל: חיפוש חכם, מסכם תוכן, או מסביר קוד).
 
-## Key Takeaways
+## נקודות מפתח
 
-- Coming soon
+- בקרוב
