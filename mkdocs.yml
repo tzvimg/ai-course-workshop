@@ -66,11 +66,12 @@ nav:
     - "2. עבודה עם כלי פיתוח AI": modules/02-ai-workflows.md
     - "3. הכוח של Terminal Agents — Kiro CLI": modules/03-terminal-agents.md
     - "4. Plan Mode — תכנון פיצ׳רים מורכבים": modules/04-plan-mode.md
-    - "5. בניית Coding Agent": modules/05-agentic-coding.md
-    - "6. שרתי MCP — הרחבת יכולות ה-Agent": modules/06-mcp-servers.md
-    - "7. Skills — אוטומציה של תהליכי עבודה": modules/07-skills.md
-    - "8. Sub-Agents — תזמור agents מרובים": modules/08-subagents.md
-    - "9. בניית פיצ׳רים עם AI": modules/09-building-ai-features.md
-    - "10. דפוסים מתקדמים": modules/10-advanced-patterns.md
-    - "11. פרויקט מסכם — GitHub Repo Summarizer": modules/11-final-project.md
+    - "5. Steering — ניווט ה-Agent להצלחה": modules/05-steering.md
+    - "6. בניית Coding Agent": modules/06-agentic-coding.md
+    - "7. שרתי MCP — הרחבת יכולות ה-Agent": modules/07-mcp-servers.md
+    - "8. Skills — אוטומציה של תהליכי עבודה": modules/08-skills.md
+    - "9. Sub-Agents — תזמור agents מרובים": modules/09-subagents.md
+    - "10. בניית פיצ׳רים עם AI": modules/10-building-ai-features.md
+    - "11. דפוסים מתקדמים": modules/11-advanced-patterns.md
+    - "12. פרויקט מסכם — GitHub Repo Summarizer": modules/12-final-project.md
   - "📺 שיעורי הקורס": "https://go.merling.co.il/ai-presentation/"
