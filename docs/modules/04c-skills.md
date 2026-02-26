@@ -21,8 +21,9 @@ Skills הם **פקודות slash מותאמות אישית** שמוסיפים ל
 
 ### הרעיון הבסיסי
 
-```
-קובץ Markdown עם הוראות  →  פקודת slash  →  Claude Code מבצע
+```mermaid
+graph LR
+    MD["📄 קובץ Markdown<br/>עם הוראות"] --> SC["⌨️ פקודת slash<br/>/command"] --> CC["🤖 Claude Code<br/>מבצע"]
 ```
 
 לדוגמה:
