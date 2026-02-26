@@ -1,5 +1,7 @@
 # AI for Software Engineering — Workshop
 
+> **[Live Site](https://tzvimg.github.io/ai-course-workshop/)**
+
 A practical, hands-on workshop teaching developers how to leverage AI tools throughout the software development lifecycle.
 
 ## What is this?
