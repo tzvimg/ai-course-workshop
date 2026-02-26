@@ -1,4 +1,4 @@
-# מודול 2: Prompt Engineering לקוד
+# מודול 1: Prompt Engineering לקוד
 
 !!! info "משך"
     30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון

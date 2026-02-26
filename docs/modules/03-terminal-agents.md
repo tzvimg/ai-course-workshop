@@ -1,4 +1,4 @@
-# מודול 3B: הכוח של Terminal Agents — Kiro CLI
+# מודול 3: הכוח של Terminal Agents — Kiro CLI
 
 !!! info "משך"
     30 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון

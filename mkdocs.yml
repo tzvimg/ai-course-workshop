@@ -62,14 +62,14 @@ markdown_extensions:
 nav:
   - דף הבית: index.md
   - מודולים:
-    - "2. Prompt Engineering": modules/02-prompt-engineering.md
-    - "3. עבודה עם כלי פיתוח AI": modules/03-ai-workflows.md
-    - "3B. הכוח של Terminal Agents — Kiro CLI": modules/03b-terminal-agents.md
-    - "3C. Plan Mode — תכנון פיצ׳רים מורכבים": modules/03c-plan-mode.md
-    - "4. בניית Coding Agent": modules/04-agentic-coding.md
-    - "4B. שרתי MCP — הרחבת יכולות ה-Agent": modules/04b-mcp-servers.md
-    - "4C. Skills — אוטומציה של תהליכי עבודה": modules/04c-skills.md
-    - "4D. Sub-Agents — תזמור agents מרובים": modules/04d-subagents.md
-    - "5. בניית פיצ׳רים עם AI": modules/05-building-ai-features.md
-    - "6. דפוסים מתקדמים": modules/06-advanced-patterns.md
-    - "7. פרויקט מסכם — GitHub Repo Summarizer": modules/08-final-project.md
+    - "1. Prompt Engineering": modules/01-prompt-engineering.md
+    - "2. עבודה עם כלי פיתוח AI": modules/02-ai-workflows.md
+    - "3. הכוח של Terminal Agents — Kiro CLI": modules/03-terminal-agents.md
+    - "4. Plan Mode — תכנון פיצ׳רים מורכבים": modules/04-plan-mode.md
+    - "5. בניית Coding Agent": modules/05-agentic-coding.md
+    - "6. שרתי MCP — הרחבת יכולות ה-Agent": modules/06-mcp-servers.md
+    - "7. Skills — אוטומציה של תהליכי עבודה": modules/07-skills.md
+    - "8. Sub-Agents — תזמור agents מרובים": modules/08-subagents.md
+    - "9. בניית פיצ׳רים עם AI": modules/09-building-ai-features.md
+    - "10. דפוסים מתקדמים": modules/10-advanced-patterns.md
+    - "11. פרויקט מסכם — GitHub Repo Summarizer": modules/11-final-project.md
