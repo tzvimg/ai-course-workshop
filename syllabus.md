@@ -41,6 +41,20 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
+## Module 3B: The Power of Terminal Agents — Kiro CLI
+- What makes terminal agents (Kiro CLI) unique vs IDE agents
+- The "mission folder" pattern: open a folder, launch Kiro CLI, execute any task
+- Full system access: disk cleanup, log analysis, resource monitoring
+- Server communication: SSH, API calls, database queries
+- Package management and environment setup
+- Code formatting, linting, and bulk transformations
+- Git operations, CI/CD debugging, Docker management
+- When to use Kiro CLI vs Kiro IDE / Cursor
+
+**Exercise:** Create mission folders and use Kiro CLI for 4 real-world missions: disk analysis, environment setup, code formatting, and server/API debugging.
+
+---
+
 ## Module 4: Agentic Coding — AI as Your Pair Programmer
 - CLI agents: Claude Code, Aider, Codex
 - IDE agents: Cursor, Copilot, Windsurf

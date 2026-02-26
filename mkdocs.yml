@@ -61,6 +61,7 @@ nav:
     - "1. יסודות": modules/01-foundations.md
     - "2. Prompt Engineering": modules/02-prompt-engineering.md
     - "3. עבודה עם כלי פיתוח AI": modules/03-ai-workflows.md
+    - "3B. הכוח של Terminal Agents — Kiro CLI": modules/03b-terminal-agents.md
     - "4. בניית Coding Agent": modules/04-agentic-coding.md
     - "5. בניית פיצ׳רים עם AI": modules/05-building-ai-features.md
     - "6. דפוסים מתקדמים": modules/06-advanced-patterns.md
