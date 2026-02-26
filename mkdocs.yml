@@ -62,7 +62,6 @@ markdown_extensions:
 nav:
   - דף הבית: index.md
   - מודולים:
-    - "1. יסודות": modules/01-foundations.md
     - "2. Prompt Engineering": modules/02-prompt-engineering.md
     - "3. עבודה עם כלי פיתוח AI": modules/03-ai-workflows.md
     - "3B. הכוח של Terminal Agents — Kiro CLI": modules/03b-terminal-agents.md

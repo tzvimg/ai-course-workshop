@@ -10,7 +10,6 @@
 
 ## מה תלמדו
 
-- **יסודות** — איך כלי AI לכתיבת קוד באמת עובדים מתחת למכסה
 - **Prompt Engineering** — כתיבת prompts שמייצרים קוד ברמת production
 - **תהליכי עבודה עם AI** — Code review, בדיקות, refactoring ותיעוד עם AI
 - **Agentic Coding** — שימוש ב-Claude Code, Cursor ו-Copilot כ-pair programmers
@@ -33,4 +32,4 @@
 
 ## בואו נתחיל
 
-עברו ל[מודול 1: יסודות](modules/01-foundations.md) כדי להתחיל.
+עברו ל[מודול 2: Prompt Engineering](modules/02-prompt-engineering.md) כדי להתחיל.

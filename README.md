@@ -8,7 +8,6 @@ A Hebrew (RTL) workshop site built with [MkDocs Material](https://squidfunk.gith
 
 ## Modules
 
-1. **Foundations** — How AI coding tools actually work under the hood
 2. **Prompt Engineering** — Writing prompts that produce production-grade code
 3. **Working with AI Dev Tools** — Context management, sessions, rules, MCP
    - 3B. Terminal Agents (Kiro CLI)
@@ -41,7 +40,6 @@ The site will be available at `http://localhost:8000`.
 docs/
 ├── index.md                  # Homepage
 ├── modules/
-│   ├── 01-foundations.md
 │   ├── 02-prompt-engineering.md
 │   ├── 03-ai-workflows.md
 │   ├── 03b-terminal-agents.md
