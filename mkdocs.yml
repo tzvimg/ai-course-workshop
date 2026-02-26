@@ -69,6 +69,7 @@ nav:
     - "4. בניית Coding Agent": modules/04-agentic-coding.md
     - "4B. שרתי MCP — הרחבת יכולות ה-Agent": modules/04b-mcp-servers.md
     - "4C. Skills — אוטומציה של תהליכי עבודה": modules/04c-skills.md
+    - "4D. Sub-Agents — תזמור agents מרובים": modules/04d-subagents.md
     - "5. בניית פיצ׳רים עם AI": modules/05-building-ai-features.md
     - "6. דפוסים מתקדמים": modules/06-advanced-patterns.md
     - "7. פרויקט מסכם — GitHub Repo Summarizer": modules/08-final-project.md
