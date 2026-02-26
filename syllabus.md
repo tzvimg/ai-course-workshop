@@ -66,6 +66,28 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
+## Module 4B: MCP Servers — Extending Agent Capabilities
+- What is MCP (Model Context Protocol) and why it exists
+- Architecture: client/server, transports (stdio, Streamable HTTP)
+- Capabilities: Tools, Resources, Prompts
+- Configuring existing MCP servers (filesystem, GitHub)
+- Building a custom MCP server from scratch with the MCP SDK
+
+**Exercise:** Configure a filesystem MCP server, then build your own "notes" MCP server with TypeScript and use it from Claude Code.
+
+---
+
+## Module 4C: Skills — Automating Workflows
+- What are Skills (custom slash commands for Claude Code)
+- Anatomy of a skill file: description, instructions, arguments
+- Using existing community skills
+- Building custom skills for your workflow
+- Advanced patterns: multi-step workflows, team conventions
+
+**Exercise:** Install and use pre-made skills, then build a custom skill that automates a repetitive task in your workflow (e.g., deploy-check, component scaffolding, DB migration).
+
+---
+
 ## Module 5: Building AI-Powered Features
 - Integrating LLM APIs into your applications
 - RAG (Retrieval-Augmented Generation) basics
