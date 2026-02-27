@@ -35,6 +35,9 @@ theme:
 extra_css:
   - stylesheets/rtl.css
 
+extra_javascript:
+  - javascripts/rtl-code.js
+
 extra:
   manifest: manifest.webmanifest
 
