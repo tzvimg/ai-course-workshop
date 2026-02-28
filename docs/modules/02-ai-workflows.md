@@ -28,6 +28,43 @@
 
 **ב-Kiro** זה ה-AI Panel שנפתח בצד. **ב-Cursor** זה ה-Composer/Chat. **ב-Claude Code** זה ה-terminal עצמו.
 
+### השוואת כלי פיתוח AI פופולריים
+
+יש היום כמה כלים מרכזיים בשוק. הנה סקירה של כל אחד — מה שחשוב לדעת כדי לבחור את המתאים לכם:
+
+- **Kiro**
+    - **סוג:** IDE מבוסס VS Code (fork)
+    - **חוזקות עיקריות:** מצב Spec לתכנון מובנה (דרישות → design → קוד), skills מובנים, integration עם AWS
+    - **מתאים במיוחד ל:** צוותים שרוצים workflow מובנה מתכנון עד מימוש, פרויקטים עם דרישות ברורות
+    - **תמיכה במודלים:** Claude Sonnet, Claude Opus (דרך Amazon Bedrock)
+
+- **Cursor**
+    - **סוג:** IDE מבוסס VS Code (fork)
+    - **חוזקות עיקריות:** Composer חזק לעריכות multi-file, Tab autocomplete מצוין, Cmd+K לעריכות inline
+    - **מתאים במיוחד ל:** מפתחים שרוצים AI משולב בתוך IDE מוכר עם חוויית עריכה חלקה
+    - **תמיכה במודלים:** Claude Sonnet, Claude Opus, GPT-4o, Gemini, ועוד — מגוון רחב של ספקים
+
+- **Claude Code**
+    - **סוג:** CLI (כלי שורת פקודה)
+    - **חוזקות עיקריות:** agentic לחלוטין — קורא, כותב, מריץ פקודות באופן עצמאי. אין ממשק גרפי שמגביל. SDK לבניית agents מותאמים
+    - **מתאים במיוחד ל:** מפתחים שאוהבים terminal, משימות אוטומציה, CI/CD pipelines, בניית multi-agent systems
+    - **תמיכה במודלים:** Claude Sonnet, Claude Opus (ישירות מ-Anthropic)
+
+- **Windsurf**
+    - **סוג:** IDE מבוסס VS Code (fork)
+    - **חוזקות עיקריות:** Cascade flow — שיחה שמתורגמת לפעולות על הקוד, מעקב context אוטומטי טוב
+    - **מתאים במיוחד ל:** מפתחים שרוצים חוויה conversational חלקה עם הבנת context טובה
+    - **תמיכה במודלים:** Claude Sonnet, GPT-4o, ועוד
+
+- **GitHub Copilot**
+    - **סוג:** Extension ל-VS Code ול-IDEs אחרים + CLI
+    - **חוזקות עיקריות:** autocomplete מהיר ומדויק, integration טבעי עם GitHub (PRs, issues, Actions), Agent mode עם שיפורים משמעותיים
+    - **מתאים במיוחד ל:** צוותים שכבר עובדים עם GitHub ecosystem, מפתחים שרוצים autocomplete חכם בלי להחליף IDE
+    - **תמיכה במודלים:** Claude Sonnet, Claude Opus, GPT-4o, Gemini — תמיכה רחבה
+
+!!! note "הכלים משתנים מהר"
+    ההשוואה הזו מדויקת לתאריך הכתיבה. כלים מוסיפים יכולות כל כמה שבועות. העיקרון החשוב: כולם בנויים על אותם עקרונות בסיסיים (context, rules, permissions, agent loop) — ולכן מי שמבין עקרון אחד, יכול לעבור בין כלים בקלות.
+
 ### מבט על הפאנל — Kiro כדוגמה
 
 ![פאנל ה-AI ב-Kiro](../assets/kiro-panel.jpg){ width="380" }
@@ -175,6 +212,109 @@
 - Install new dependencies without asking
 ```
 
+**מה טוב בדוגמה הזו?** הכללים **ספציפיים ואקציוניים** — המודל יודע בדיוק מה לעשות ומה לא. הם מחולקים לקטגוריות ברורות (stack, conventions, do NOT), קצרים וממוקדים, ולא סותרים אחד את השני.
+
+### דוגמה לקובץ כללים גרוע
+
+```markdown
+# Rules
+
+- Write good code
+- Follow best practices
+- Make sure everything works
+- Use modern technologies
+- Be consistent
+- Don't write bad code
+- Always add comments to everything
+- Never add comments (they clutter the code)
+- Use functional programming
+- Use OOP design patterns
+- Always use TypeScript strict mode
+- It's OK to use `any` when it's convenient
+- Test everything thoroughly
+- Use Jest for testing
+- Use Vitest for testing
+- Use Mocha for testing
+- Make sure the code is clean
+- Follow SOLID principles
+- Use dependency injection
+- Keep functions small
+- Don't over-engineer
+- Always handle errors
+- Performance is the top priority
+- Readability is the top priority
+- Always optimize for bundle size
+```
+
+**למה זה גרוע?**
+
+- **כללים מעורפלים** — "Write good code" ו-"Follow best practices" לא אומרים למודל כלום. הוא צריך הנחיות קונקרטיות
+- **סתירות** — "Always add comments" מול "Never add comments", "Use `any` when convenient" מול "TypeScript strict mode", שלושה frameworks שונים ל-testing
+- **יותר מדי כללים** — 20+ כללים גנריים יוצרים רעש. המודל לא יודע מה באמת חשוב. עדיף 8-12 כללים ספציפיים מאשר 25 כללים מעורפלים
+- **אין היררכיה** — הכל ברשימה שטוחה, בלי קטגוריות. קשה למודל לדעת מה קריטי ומה nice-to-have
+- **עדיפויות סותרות** — "Performance is the top priority" מול "Readability is the top priority". אם הכל top priority — שום דבר לא top priority
+
+!!! tip "כלל אצבע לכתיבת rules"
+    לכל כלל שאתם כותבים, שאלו את עצמכם: **"האם המודל יכול לפעול לפי הכלל הזה בלי לשאול שאלות?"** אם התשובה לא — הכלל לא ספציפי מספיק.
+
+## מעבר בין כלים — העקרונות אוניברסליים
+
+אחד הדברים החשובים ביותר שנלמד במודול הזה הוא שהעקרונות **זהים בכל הכלים**. המשמעות המעשית: אם למדתם לעבוד עם כלי אחד, המעבר לכלי אחר הוא עניין של כמה דקות — לא ימים.
+
+### דוגמה: העברת rules בין כלים
+
+נניח שיש לכם קובץ rules ב-Cursor. ככה הוא נראה בכל כלי:
+
+**ב-Cursor** — קובץ `.cursor/rules/project.md`:
+
+```markdown
+# Project Rules
+- TypeScript strict mode
+- Use named exports
+- Tests with vitest, co-located (*.test.ts)
+- Do NOT use `any` type
+```
+
+**ב-Kiro** — קובץ `.kiro/rules/project.md`:
+
+```markdown
+# Project Rules
+- TypeScript strict mode
+- Use named exports
+- Tests with vitest, co-located (*.test.ts)
+- Do NOT use `any` type
+```
+
+**ב-Claude Code** — קובץ `CLAUDE.md`:
+
+```markdown
+# Project Rules
+- TypeScript strict mode
+- Use named exports
+- Tests with vitest, co-located (*.test.ts)
+- Do NOT use `any` type
+```
+
+שימו לב: **התוכן זהה לחלוטין**. ההבדל היחיד הוא שם הקובץ והמיקום שלו. זה נכון גם ל-MCP (אותו `mcp.json` עם הבדלי נתיב בלבד), הרשאות (אותם עקרונות, ממשק שונה), וניהול סשנים.
+
+### מה כן שונה בין כלים?
+
+- **חוויית המשתמש** — IDE לעומת CLI, keybindings, ממשק גרפי
+- **פיצ'רים ייחודיים** — Spec mode ב-Kiro, Tab completion ב-Cursor, SDK ב-Claude Code
+- **מודלים זמינים** — לא כל כלי תומך בכל מודל
+- **תמחור** — מנוי חודשי לעומת pay-per-use
+
+**מה לא שונה:**
+
+- איך כותבים rules טובים
+- איך מנהלים context
+- איך עובדים עם MCP
+- איך נותנים הרשאות
+- מתי פותחים סשן חדש
+
+!!! tip "טיפ מעשי"
+    כשמתחילים עם כלי חדש, העתיקו את קובץ ה-rules מהכלי הקודם, שנו את שם הקובץ והמיקום, ואתם מוכנים. 90% מהעבודה כבר עשויה.
+
 ## MCP — Model Context Protocol
 
 ### מה זה?
@@ -190,7 +330,7 @@ MCP הוא פרוטוקול שמאפשר לכלי AI להתחבר ל**שירות
 ### איך זה עובד?
 
 ```
-AI Tool ←→ MCP Client ←→ MCP Server ←→ External Service
+AI Tool <--> MCP Client <--> MCP Server <--> External Service
 ```
 
 ה-MCP server חושף **כלים** (tools) — כפי שנלמד בהמשך כשנצלול לתוך ה-agent loop. המודל קורא לכלי, ה-MCP server מבצע, ומחזיר תוצאה.
