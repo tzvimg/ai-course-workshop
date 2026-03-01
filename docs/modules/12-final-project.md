@@ -1,4 +1,4 @@
-# מודול 11: פרויקט מסכם — GitHub Repo Summarizer API
+# מודול 12: פרויקט מסכם — GitHub Repo Summarizer API
 
 !!! info "משך"
     סשן מורחב — 3+ שעות
