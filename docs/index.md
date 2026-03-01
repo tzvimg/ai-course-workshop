@@ -49,7 +49,11 @@
 
 - **Claude Code (Kiro CLI)** — ה-agent המרכזי בסדנה
     ```bash
-    npm install -g @anthropic-ai/kiro-cli
+    # macOS / Linux
+    curl -fsSL https://cli.kiro.dev/install | bash
+
+    # אחרי ההתקנה, אתחלו עם:
+    kiro
     ```
 - **Cursor IDE** — [cursor.com](https://www.cursor.com/) — IDE עם agent מובנה (חינמי עם מגבלות, Pro ב-$20/חודש)
 - **Kiro IDE** — [kiro.dev](https://kiro.dev/) — IDE של AWS עם יכולות agent
