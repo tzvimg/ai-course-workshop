@@ -15,7 +15,10 @@ code,
 .highlight,
 .codehilite,
 .md-typeset pre,
-.md-typeset code {
+.md-typeset code,
+.md-typeset .highlight,
+.md-typeset .highlight pre,
+.md-typeset .highlight code {
   direction: ltr;
   text-align: left;
 }
