@@ -221,6 +221,67 @@ Orchestrator: "צריך לעשות code review ל-PR הזה"
 ← Orchestrator: מרכיב review אחד מ-3 התוצאות
 ```
 
+**דוגמה מפורטת — Security Audit מקבילי:**
+
+תרחיש מציאותי: רוצים לבצע security audit מקיף על הפרויקט. במקום agent אחד שסורק הכל (ומאבד פוקוס), מפצלים ל-3 agents מתמחים שרצים במקביל:
+
+```
+Orchestrator: "בצע security audit מלא לפרויקט"
+  → Agent A: "סרוק את כל ה-dependencies לפגיעויות ידועות (CVEs)"
+  → Agent B: "חפש סיכוני code injection — SQL injection, XSS, command injection"
+  → Agent C: "חפש secrets שנשארו בקוד — API keys, passwords, tokens"
+← Orchestrator: מרכיב דוח אבטחה אחד עם כל הממצאים
+```
+
+```typescript
+// Security audit עם Fan-Out
+const [vulnerabilities, injectionRisks, secretLeaks] = await Promise.all([
+  runSubAgent(
+    `Scan all dependencies in package.json / package-lock.json.
+     Check for known CVEs using the lock file versions.
+     List every dependency with a known vulnerability,
+     its severity (critical/high/medium/low), and recommended fix.`,
+    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 10 }
+  ),
+  runSubAgent(
+    `Search the entire codebase for code injection risks:
+     - SQL injection: raw SQL queries with string concatenation
+     - XSS: unescaped user input rendered in HTML/templates
+     - Command injection: shell commands built from user input
+     For each finding, show the file, line, and suggested fix.`,
+    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 12 }
+  ),
+  runSubAgent(
+    `Search for secrets and credentials leaked in the codebase:
+     - API keys, tokens, passwords in source files
+     - .env files committed to git
+     - Hardcoded connection strings
+     - Private keys or certificates
+     Check .gitignore to see if sensitive files are properly excluded.`,
+    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 10 }
+  ),
+]);
+
+// ה-orchestrator מרכיב דוח מאוחד
+const report = await runSubAgent(
+  `Compile a security audit report from these findings:
+
+   ## Dependency Vulnerabilities
+   ${vulnerabilities}
+
+   ## Code Injection Risks
+   ${injectionRisks}
+
+   ## Secret Leaks
+   ${secretLeaks}
+
+   Prioritize by severity. Group related issues together.`,
+  { allowedTools: ["Read"], maxTurns: 5 }
+);
+```
+
+כל agent מתמחה בסוג אחד של בעיית אבטחה, ולכן מדויק יותר מ-agent אחד שמנסה למצוא הכל.
+
 ### דפוס 2: Pipeline (שרשרת)
 
 **הרעיון:** כל agent מקבל את התוצאה של הקודם ומוסיף עליה.
@@ -243,6 +304,37 @@ Agent C (Coder): "תממש את התוכנית הזו"
 Agent D (Coder): "תכתוב tests לקוד החדש"
   → תוצאה: קבצי test
 ```
+
+**דוגמה מפורטת — מימוש פיצ'ר עם העברת context בין שלבים:**
+
+הנקודה החשובה ב-Pipeline היא **מה בדיוק עובר בין השלבים**. כל agent צריך לקבל סיכום ממוקד, לא dump מלא:
+
+```
+Agent A (Explore) — "חקור את מערכת ה-notifications הקיימת"
+  → מעביר הלאה:
+    - רשימת קבצים רלוונטיים: src/notifications/, src/models/notification.ts
+    - הטכנולוגיות: Redis pub/sub, PostgreSQL לשמירה
+    - ה-API הקיים: POST /notify, GET /notifications/:userId
+    - חסרונות שזוהו: אין תמיכה ב-batching, אין rate limiting
+
+Agent B (Plan) — מקבל את הסיכום + המשימה "הוסף email notifications"
+  → מעביר הלאה:
+    - תוכנית מפורטת: 4 קבצים לשנות, 2 קבצים חדשים
+    - סדר מימוש: model → service → controller → tests
+    - interface מוגדר: EmailNotification { to, subject, template, vars }
+    - סיכונים: צריך לוודא שה-email service לא חוסם את ה-event loop
+
+Agent C (Coder) — מקבל את התוכנית המפורטת
+  → מעביר הלאה:
+    - רשימת קבצים שנוצרו/שונו עם תיאור קצר של כל שינוי
+    - ה-interface הסופי שמומש
+    - הערות על החלטות שנלקחו במימוש
+
+Agent D (Coder) — מקבל רשימת שינויים + interfaces
+  → תוצאה סופית: קבצי test שמכסים את כל ה-cases
+```
+
+המפתח להצלחה: כל שלב מחזיר **סיכום מובנה** שה-agent הבא יכול לפעול לפיו, לא סתם טקסט חופשי.
 
 ### דפוס 3: Supervisor
 
@@ -267,6 +359,250 @@ Supervisor: "העבר את הפרויקט מ-JavaScript ל-TypeScript"
   → Supervisor: מנתח את הבעיה, שולח הנחיות מתוקנות
   → Worker 1 (שוב): "המר עם ה-type definitions האלה"
   → Worker 2: "המר את src/components/ ל-TypeScript"
+```
+
+**מתי ה-Supervisor מתערב? דוגמה מפורטת:**
+
+ה-Supervisor לא סתם "מפקח" — הוא בודק באופן אקטיבי את התוצאות של כל worker ומחליט אם להמשיך, לתקן, או לעצור. הנה מה שמפעיל התערבות:
+
+- **בדיקת איכות:** התוצאה של ה-worker לא עומדת בסטנדרט (קוד לא עובר lint, חסרים error handlers)
+- **זיהוי שגיאות:** ה-worker מדווח על בעיה שהוא לא יכול לפתור לבד
+- **זיהוי קונפליקטים:** שני workers שינו קבצים בצורה סותרת
+- **עדכון הנחיות:** מידע חדש שנחשף בשלב אחד משנה את ההנחיות לשלבים הבאים
+
+```typescript
+// Supervisor loop עם validation
+async function supervisedMigration(directories: string[]) {
+  const sharedTypes: string[] = []; // types שנוצרו ע"י workers קודמים
+
+  for (const dir of directories) {
+    let attempt = 0;
+    let success = false;
+
+    while (attempt < 3 && !success) {
+      const workerResult = await runSubAgent(
+        `Convert ${dir} from JavaScript to TypeScript.
+         Use these shared type definitions from previous conversions:
+         ${sharedTypes.join("\n")}
+
+         Return a JSON summary:
+         { "convertedFiles": [...], "newTypes": [...], "errors": [...] }`,
+        {
+          allowedTools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
+          maxTurns: 20,
+        }
+      );
+
+      // Supervisor בודק את התוצאה
+      const validation = await runSubAgent(
+        `Validate the TypeScript migration of ${dir}.
+         Worker reported: ${workerResult}
+
+         Check:
+         1. Do all files compile? (run tsc --noEmit)
+         2. Are there any 'any' types that should be specific?
+         3. Are all imports updated correctly?
+
+         Return: { "valid": true/false, "issues": [...] }`,
+        {
+          allowedTools: ["Read", "Glob", "Grep", "Bash"],
+          maxTurns: 10,
+        }
+      );
+
+      if (validation.includes('"valid": true')) {
+        success = true;
+        // שמור types חדשים לשימוש workers הבאים
+        const newTypes = extractTypes(workerResult);
+        sharedTypes.push(...newTypes);
+      } else {
+        attempt++;
+        console.log(
+          `Supervisor: Worker output for ${dir} failed validation, ` +
+          `retrying (attempt ${attempt}/3)`
+        );
+      }
+    }
+
+    if (!success) {
+      console.error(
+        `Supervisor: Failed to migrate ${dir} after 3 attempts, skipping`
+      );
+    }
+  }
+}
+```
+
+הלולאה של ה-Supervisor מבטיחה שכל שלב עובר validation לפני שממשיכים הלאה — ואם לא, ה-worker מקבל הזדמנות נוספת עם context מעודכן.
+
+## פתרון קונפליקטים בין agents
+
+כשמספר agents עובדים על אותו codebase, קונפליקטים הם בלתי נמנעים. חשוב להכיר את סוגי הקונפליקטים ולתכנן מראש איך למנוע אותם.
+
+### קונפליקטים בקבצים (File Conflicts)
+
+**הבעיה:** שני agents מנסים לשנות את אותו קובץ בו-זמנית. Agent A מוסיף function בשורה 50, ו-Agent B משנה import בשורה 3 — אבל כל אחד מהם קרא את הקובץ לפני שהשני כתב. התוצאה: השינוי של אחד מהם נדרס.
+
+**פתרונות:**
+
+- **הקצאה בלעדית:** חלקו קבצים בין agents מראש. Agent A אחראי על `src/auth/`, Agent B על `src/api/` — בלי חפיפה
+- **השתמשו ב-Pipeline במקום Fan-Out:** אם שני agents צריכים לגעת באותו קובץ, שרשרו אותם — Agent A כותב קודם, Agent B מקבל את הגרסה המעודכנת
+- **Orchestrator merge:** ה-orchestrator אוסף את השינויים המבוקשים משני ה-agents ומבצע agent שלישי שמיישם את כולם יחד
+
+### קונפליקטים סמנטיים (Semantic Conflicts)
+
+**הבעיה:** Agent A מוסיף function חדש `validateInput()` ויוצר קריאות אליו. Agent B עושה refactor ומוחק את הקובץ שבו Agent A ציפה שה-function יהיה, או משנה את ה-interface שה-function משתמש בו. כל agent עבד נכון בפני עצמו, אבל ביחד — הקוד שבור.
+
+**פתרון:** הוסיפו **validation agent** שרץ אחרי כל ה-agents האחרים:
+
+```typescript
+// Validation agent שבודק עקביות אחרי כל השינויים
+const validation = await runSubAgent(
+  `All changes have been applied. Verify consistency:
+   1. Run the TypeScript compiler (tsc --noEmit) and report errors
+   2. Check that all imports resolve to existing files
+   3. Check that all function calls match existing function signatures
+   4. Run the test suite and report failures
+
+   If there are issues, list each one with the file and line number.`,
+  {
+    allowedTools: ["Read", "Glob", "Grep", "Bash"],
+    maxTurns: 15,
+  }
+);
+```
+
+### קונפליקטים במשאבים (Resource Conflicts)
+
+**הבעיה:** מספר agents מריצים `npm install` במקביל, או מנסים לעשות `git commit` בו-זמנית, או כותבים לאותו lock file. התוצאה: שגיאות file lock, מצב לא עקבי של `node_modules`, או corrupted git state.
+
+**פתרון:** סדרו (serialize) פעולות שמשנות shared resources:
+
+- הריצו `npm install` פעם אחת לפני שה-agents מתחילים
+- אם agent צריך להתקין package, תנו לו לעדכן רק את `package.json` — וה-orchestrator יריץ `npm install` אחר כך
+- פעולות git (commit, branch) — רק ב-orchestrator, אף פעם לא ב-sub-agents
+
+!!! tip "כלל אצבע"
+    אם agents צריכים לגעת באותם קבצים — השתמשו ב-**Pipeline**, לא ב-**Fan-Out**. Fan-Out בטוח רק כשכל agent עובד על קבצים נפרדים לחלוטין.
+
+## השוואת ביצועים: agent בודד מול sub-agents
+
+מתי multi-agent באמת משתלם מבחינת זמן? הנה הערכות גסות של זמני ביצוע:
+
+- **משימה פשוטה** (עריכת קובץ בודד): Agent בודד ~30 שניות, Multi-agent ~90 שניות (ה-overhead של הקמת agents לא משתלם)
+- **משימה בינונית** (3-5 קבצים): Agent בודד ~2 דקות, Multi-agent ~2 דקות (דומה — ה-overhead מתקזז עם המקביליות)
+- **משימה מורכבת** (10+ קבצים, שינויים cross-cutting): Agent בודד ~5-8 דקות (או נכשל מ-context overflow), Multi-agent ~3-4 דקות (כאן המקביליות מנצחת)
+- **משימה מאוד מורכבת** (פיצ'ר שלם, 20+ קבצים): Agent בודד לרוב נכשל (context overflow, אובד פוקוס), Multi-agent ~5-7 דקות (הדרך היחידה שעובדת)
+
+!!! note "הערה חשובה"
+    המספרים האלה הם **הערכות גסות** שתלויות בגורמים רבים: גודל ה-codebase, המודל שבשימוש (Sonnet vs Opus), מורכבות הקוד, מהירות ה-API, וכמה context כל agent צריך. השתמשו בהם כ-guideline כללי, לא כמדד מדויק. מומלץ למדוד בפרויקט שלכם.
+
+## בטיחות: מניעת agents חסרי שליטה
+
+כשמפעילים agents אוטונומיים, חשוב לוודא שהם לא גורמים נזק. הנה הסיכונים העיקריים ואיך למנוע אותם:
+
+### מיצוי משאבים (Resource Exhaustion)
+
+Agent שנתקע ב-loop אינסופי יכול לצרוך tokens ללא הגבלה. השתמשו ב-**הגנה כפולה**: `maxTurns` + timeout:
+
+```typescript
+// הגנה כפולה: maxTurns ברמת ה-agent + timeout ברמת הקוד
+async function runSubAgentSafely(
+  prompt: string,
+  options: Partial<ClaudeCodeOptions>
+) {
+  return Promise.race([
+    runSubAgent(prompt, {
+      ...options,
+      maxTurns: options.maxTurns ?? 15, // הגנה ראשונה: מגבלת סיבובים
+    }),
+    timeout(120_000).then(() => {  // הגנה שנייה: 2 דקות timeout
+      throw new Error("Sub-agent timed out after 120 seconds");
+    }),
+  ]);
+}
+
+function timeout(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+```
+
+גם אם `maxTurns` לא מספיק (Agent שכל turn לוקח לו הרבה זמן), ה-timeout יתפוס את זה.
+
+### צריכת שטח דיסק
+
+Agent עם הרשאות כתיבה יכול ליצור מספר גדול של קבצים — למשל, agent שמייצר tests יכול ליצור אלפי קבצים אם ה-prompt לא ברור. הגנות:
+
+- **הגבלת working directory:** תנו ל-agent לעבוד רק בתיקייה ספציפית
+- **מעקב אחרי מספר קבצים:** בדקו כמה קבצים נוצרו אחרי שה-agent סיים, ואם המספר חריג — בדקו ידנית
+- **הרשאות מינימליות:** אם Agent לא חייב ליצור קבצים חדשים, תנו לו רק `Edit` (עריכת קבצים קיימים) בלי `Write`
+
+### עלויות API שיוצאות משליטה
+
+ב-multi-agent, העלויות יכולות לצמוח מהר. אם orchestrator מפעיל 5 agents שכל אחד מפעיל 3 sub-agents — זה 15 sessions של API calls:
+
+```typescript
+// מעקב אחר צריכת tokens כוללת
+let totalTokensUsed = 0;
+const TOKEN_BUDGET = 500_000; // תקציב מקסימלי
+
+async function runSubAgentWithBudget(
+  prompt: string,
+  options: Partial<ClaudeCodeOptions>
+): Promise<string> {
+  if (totalTokensUsed >= TOKEN_BUDGET) {
+    throw new Error(
+      `Token budget exhausted: ${totalTokensUsed}/${TOKEN_BUDGET}`
+    );
+  }
+
+  let result = "";
+  for await (const message of query({ prompt, ...options })) {
+    if (message.type === "result") {
+      result = message.result;
+    }
+    if (message.type === "usage") {
+      totalTokensUsed += message.inputTokens + message.outputTokens;
+    }
+  }
+
+  console.log(
+    `Token usage: ${totalTokensUsed}/${TOKEN_BUDGET} ` +
+    `(${Math.round((totalTokensUsed / TOKEN_BUDGET) * 100)}%)`
+  );
+
+  return result;
+}
+```
+
+### כשלונות מדורגים (Cascading Failures)
+
+כש-Agent A מייצר output שגוי, ו-Agent B מקבל אותו כ-input — Agent B ייכשל גם כן, או גרוע מזה, יייצר קוד שגוי בלי לדעת. הפתרון: **validate intermediate results** לפני שמעבירים אותם הלאה:
+
+```typescript
+// Pipeline עם validation בין שלבים
+const exploration = await runSubAgent("Explore the auth system...", {
+  allowedTools: ["Read", "Glob", "Grep"],
+  maxTurns: 10,
+});
+
+// validation לפני שממשיכים לשלב הבא
+if (!exploration || exploration.length < 100) {
+  throw new Error("Exploration returned insufficient results, aborting pipeline");
+}
+
+// בדיקה שה-exploration מכיל מידע שימושי
+if (!exploration.includes("src/") && !exploration.includes("file")) {
+  throw new Error(
+    "Exploration did not find any relevant files, aborting pipeline"
+  );
+}
+
+// רק אם ה-validation עבר — ממשיכים לשלב הבא
+const plan = await runSubAgent(
+  `Based on this analysis: ${exploration}\n\nCreate a plan...`,
+  { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 10 }
+);
 ```
 
 ## טיפול בכשלונות
@@ -411,7 +747,7 @@ async function parallelExploreWithFallback(task: string) {
 !!! tip "טיפ לחיסכון"
     התחילו תמיד עם agent בודד. רק אם הוא נכשל, מייצר תוצאה חלקית, או שה-context מתמלא — עברו ל-multi-agent. אל תתחילו עם orchestrator מורכב למשימה שאפשר לפתור ב-prompt אחד.
 
-## תרגיל מעשי 1: חקירה מקבילית (25 דקות)
+## תרגיל מעשי 1: חקירה מקבילית (30 דקות)
 
 ### התרחיש
 
@@ -449,7 +785,7 @@ kiro
 !!! tip "מתי Kiro CLI מפעיל sub-agents?"
     Kiro CLI מפעיל sub-agents כשהוא מזהה שהמשימה מורכבת מספיק או כשמבקשים ממנו מפורשות לבצע דברים במקביל. לפעמים הוא יבחר לעבוד לבד — זה חלק מההחלטה של ה-orchestrator.
 
-## תרגיל מעשי 2: בניית Orchestrator (50 דקות)
+## תרגיל מעשי 2: בניית Orchestrator (55 דקות)
 
 ### המטרה
 
