@@ -80,11 +80,9 @@ graph TB
 
 ### שלושת הרכיבים של שרת MCP
 
-| רכיב | תיאור | דוגמה |
-|------|--------|-------|
-| **Tools** | פעולות שה-agent יכול להפעיל | `create_issue`, `query_db`, `send_message` |
-| **Resources** | מקורות מידע שה-agent יכול לקרוא | קבצי config, סכמת DB, דוקומנטציה |
-| **Prompts** | תבניות prompt מוכנות | "סכם את ה-issue הזה", "כתוב migration" |
+- **Tools** — פעולות שה-agent יכול להפעיל. דוגמה: `create_issue`, `query_db`, `send_message`
+- **Resources** — מקורות מידע שה-agent יכול לקרוא. דוגמה: קבצי config, סכמת DB, דוקומנטציה
+- **Prompts** — תבניות prompt מוכנות. דוגמה: "סכם את ה-issue הזה", "כתוב migration"
 
 ### שני סוגי Transport
 
@@ -475,6 +473,40 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{},
     1. שהקומפילציה הצליחה (`ls dist/index.js`)
     2. שה-`package.json` מכיל `"type": "module"`
     3. שאין שגיאות ב-imports
+
+### בדיקה עם MCP Inspector
+
+אפשר לבדוק את השרת **בלי Claude Code** באמצעות MCP Inspector — כלי ויזואלי לבדיקת שרתי MCP:
+
+```bash
+npx @modelcontextprotocol/inspector node dist/index.js
+```
+
+ה-Inspector פותח ממשק ב-browser שמציג את כל הכלים, מאפשר לקרוא להם ידנית, ולראות את התשובות. זה שימושי מאוד לפיתוח ודיבוג.
+
+### פתרון בעיות נפוצות
+
+!!! warning "Troubleshooting"
+    **השרת לא עולה:**
+
+    - הריצו `node dist/index.js` ידנית ובדקו שאין שגיאות
+    - וודאו ש-`tsconfig.json` מכוון ל-`"module": "Node16"`
+
+    **הכלים לא מופיעים ב-Claude Code:**
+
+    - הפעילו מחדש את Claude Code (כל שינוי בהגדרות MCP דורש restart)
+    - בדקו שהנתיב בקובץ ההגדרות הוא **absolute** (מלא), לא relative
+    - הריצו `/mcp` ב-Claude Code לראות סטטוס שרתים
+
+    **שגיאות JSON parse:**
+
+    - וודאו ש**כל** ההדפסות שלכם הולכות ל-`console.error`, לא `console.log`
+    - `stdout` שייך לפרוטוקול MCP — כל טקסט שם שובר את התקשורת
+
+    **Permission errors:**
+
+    - בדקו הרשאות קריאה/כתיבה לתיקיית העבודה
+    - ב-macOS: ייתכן שצריך לאשר גישה ל-terminal ב-System Preferences
 
 ## תרגיל 3: חיבור השרת ל-Claude Code (20 דקות)
 

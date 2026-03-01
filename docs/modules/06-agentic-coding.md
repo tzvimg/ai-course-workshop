@@ -179,9 +179,44 @@ User → Model → Tool Call → Tool Result → Model → Tool Call → ... →
 }
 ```
 
+## הגדרת API Key
+
+לפני שמתחילים לבנות, צריך מפתח API של Anthropic:
+
+### קבלת מפתח
+
+1. היכנסו ל-[console.anthropic.com](https://console.anthropic.com)
+2. צרו חשבון (או התחברו)
+3. לכו ל-**API Keys** ולחצו **Create Key**
+4. העתיקו את המפתח (מתחיל ב-`sk-ant-...`)
+
+### הגדרה כ-environment variable
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-api03-..."
+```
+
+!!! danger "אל תשמרו מפתחות בקוד"
+    - **לעולם** אל תכתבו את המפתח ישירות בקוד
+    - אל תעשו commit לקבצי `.env`
+    - הוסיפו `.env` ל-`.gitignore`
+
+לפרויקטים אמיתיים, השתמשו בקובץ `.env` עם `dotenv`:
+
+```bash
+# .env (אל תעשו commit!)
+ANTHROPIC_API_KEY=sk-ant-api03-...
+```
+
+```typescript
+import "dotenv/config"; // טוען את .env אוטומטית
+import Anthropic from "@anthropic-ai/sdk";
+const client = new Anthropic(); // קורא ANTHROPIC_API_KEY מ-env
+```
+
 ## תרגיל מעשי: בניית Coding Agent
 
-### שלב 1 — שלד ה-Agent (20 דקות)
+### שלב 1 — שלד ה-Agent (15 דקות)
 
 ממשו את ה-agent loop הבסיסי. הנה שלד בשפת TypeScript:
 
@@ -206,11 +241,44 @@ const tools: Anthropic.Tool[] = [
       required: ["path"],
     },
   },
-  // TODO: הוסיפו את שאר הכלים
+  {
+    name: "write_file",
+    description: "Write content to a file. Creates the file if it doesn't exist.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        path: { type: "string", description: "The file path to write to" },
+        content: { type: "string", description: "The content to write" },
+      },
+      required: ["path", "content"],
+    },
+  },
+  {
+    name: "run_command",
+    description: "Run a shell command and return its output",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        command: { type: "string", description: "The shell command to execute" },
+      },
+      required: ["command"],
+    },
+  },
+  {
+    name: "ask_user",
+    description: "Ask the user a question and wait for their response",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        question: { type: "string", description: "The question to ask" },
+      },
+      required: ["question"],
+    },
+  },
 ];
 
 // מימוש הכלים
-function executeTool(name: string, input: any): string {
+async function executeTool(name: string, input: any): Promise<string> {
   switch (name) {
     case "read_file":
       return fs.readFileSync(input.path, "utf-8");
@@ -218,8 +286,23 @@ function executeTool(name: string, input: any): string {
       fs.writeFileSync(input.path, input.content);
       return `File written to ${input.path}`;
     case "run_command":
-      return execSync(input.command, { encoding: "utf-8" });
-    // TODO: הוסיפו ask_user
+      try {
+        return execSync(input.command, { encoding: "utf-8", timeout: 30000 });
+      } catch (error: any) {
+        return `Command failed: ${error.message}\n${error.stderr || ""}`;
+      }
+    case "ask_user": {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+      return new Promise<string>((resolve) => {
+        rl.question(`\n🤖 ${input.question}\n> `, (answer) => {
+          rl.close();
+          resolve(answer);
+        });
+      });
+    }
     default:
       return `Unknown tool: ${name}`;
   }
@@ -258,17 +341,32 @@ Think step by step.`;
       break;
     }
 
-    // 4. ביצוע כל ה-tool calls
+    // 4. בדיקה: האם הגענו ל-max_tokens?
+    if (response.stop_reason === "max_tokens") {
+      console.log("⚠️ הגענו למגבלת tokens — התשובה נחתכה");
+      // אפשר להמשיך עם prompt "continue" או לעצור
+      break;
+    }
+
+    // 5. ביצוע כל ה-tool calls
     const toolResults: Anthropic.ToolResultBlockParam[] = [];
     for (const block of response.content) {
       if (block.type === "tool_use") {
         console.log(`🔧 ${block.name}(${JSON.stringify(block.input)})`);
-        const result = executeTool(block.name, block.input);
-        toolResults.push({
-          type: "tool_result",
-          tool_use_id: block.id,
-          content: result,
-        });
+        try {
+          const result = await executeTool(block.name, block.input);
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: block.id,
+            content: result,
+          });
+        } catch (error: any) {
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: block.id,
+            content: `Error: ${error.message}`,
+          });
+        }
       }
     }
 
@@ -278,7 +376,7 @@ Think step by step.`;
 }
 ```
 
-### שלב 2 — השלימו את הכלים (15 דקות)
+### שלב 2 — השלימו את הכלים (20 דקות)
 
 1. הוסיפו את הכלים `write_file`, `run_command` ו-`ask_user` ל-tools array
 2. ממשו את `ask_user` ב-`executeTool` (רמז: `readline` interface)
@@ -294,6 +392,14 @@ Think step by step.`;
 
 !!! warning "שימו לב"
     ה-agent שלכם יכול להריץ פקודות על המחשב! בסביבת workshop זה בסדר, אבל ב-production חובה להוסיף sandboxing ואישורים.
+
+!!! danger "אבטחה: run_command הוא מסוכן"
+    הכלי `run_command` מריץ **כל פקודת shell** — כולל `rm -rf /`, `curl | bash`, ופקודות הרסניות אחרות. ב-production חובה להגן:
+
+    - **Docker container** — הריצו את ה-agent בcontainer מבודד עם resources מוגבלים
+    - **Allowlist** — הגבילו לפקודות בטוחות בלבד (`npm test`, `tsc`, `git status`)
+    - **אישור משתמש** — הציגו את הפקודה למשתמש ובקשו אישור לפני הרצה (שילוב `ask_user` לפני `run_command`)
+    - **לעולם אל תחשפו ל-input לא מהימן** — אם משתמש חיצוני יכול לשלוט ב-prompt, הוא יכול להריץ קוד על השרת שלכם
 
 ### שלב 4 — שיפורים (20 דקות)
 

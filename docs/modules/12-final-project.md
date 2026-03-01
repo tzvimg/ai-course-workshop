@@ -141,6 +141,150 @@ curl -X POST http://localhost:8000/summarize \
 
 ---
 
+## דוגמת קוד התחלתית
+
+### חיבור בסיסי ל-LLM
+
+```python
+import anthropic
+import os
+
+client = anthropic.Anthropic(
+    api_key=os.environ["ANTHROPIC_API_KEY"]
+)
+
+def summarize_repo(repo_content: str) -> dict:
+    """שולח את תוכן ה-repo ל-LLM ומקבל סיכום מובנה."""
+    response = client.messages.create(
+        model="claude-sonnet-4-5-20250929",
+        max_tokens=2048,
+        messages=[
+            {
+                "role": "user",
+                "content": f"""Analyze this GitHub repository content and return a JSON object with:
+- "summary": A clear description of what the project does (2-3 sentences)
+- "technologies": A list of main technologies, languages, and frameworks
+- "structure": A brief description of the project layout
+
+Repository content:
+{repo_content}
+
+Return ONLY valid JSON, no extra text."""
+            }
+        ]
+    )
+
+    import json
+    return json.loads(response.content[0].text)
+```
+
+### בניית ה-prompt לסיכום
+
+טיפ: שלחו ל-LLM את **המידע הרלוונטי ביותר**, לא הכל:
+
+```python
+def build_repo_context(files: dict) -> str:
+    """בונה context מתומצת מקבצי ה-repo."""
+    context_parts = []
+
+    # 1. README תמיד ראשון — הכי אינפורמטיבי
+    if "README.md" in files:
+        context_parts.append(f"## README.md\n{files['README.md'][:3000]}")
+
+    # 2. קבצי config מגלים את ה-stack
+    for config in ["package.json", "pyproject.toml", "go.mod", "Cargo.toml"]:
+        if config in files:
+            context_parts.append(f"## {config}\n{files[config][:1000]}")
+
+    # 3. מבנה התיקיות
+    tree = "\n".join(f"  {f}" for f in sorted(files.keys())[:50])
+    context_parts.append(f"## File tree\n{tree}")
+
+    return "\n\n---\n\n".join(context_parts)
+```
+
+### טיפול בשגיאות API
+
+```python
+import time
+
+def call_llm_with_retry(prompt: str, max_retries: int = 3) -> str:
+    """קריאה ל-LLM עם retry ו-error handling."""
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=2048,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text
+
+        except anthropic.RateLimitError:
+            # Rate limit — מחכים ומנסים שוב
+            wait = 2 ** attempt  # exponential backoff
+            print(f"Rate limited. Waiting {wait}s...")
+            time.sleep(wait)
+
+        except anthropic.APIStatusError as e:
+            if e.status_code == 529:  # overloaded
+                time.sleep(5)
+                continue
+            raise  # שגיאות אחרות — מעלים הלאה
+
+        except anthropic.BadRequestError as e:
+            if "too long" in str(e).lower():
+                # Context ארוך מדי — צריך לקצר
+                raise ValueError(
+                    "Repository content exceeds context window. "
+                    "Try filtering more files."
+                )
+            raise
+
+    raise RuntimeError(f"Failed after {max_retries} retries")
+```
+
+## ניהול עלויות
+
+!!! tip "עלויות API"
+    - **בפיתוח:** השתמשו ב-Haiku (הזול ביותר) לבדיקות. עברו ל-Sonnet רק כשהכל עובד
+    - **הערכת עלות:** ~1,000 tokens ≈ 750 מילים. Repo ממוצע ≈ 5,000-20,000 tokens
+    - **Caching:** שמרו תוצאות ב-cache (Redis, קובץ, DB) — אין סיבה לשלוח את אותו repo פעמיים
+    - **הגבלות:** הגדירו spending limit ב-console.anthropic.com
+    - **מודל לפי צורך:** Haiku לrepos קטנים ופשוטים, Sonnet לrepos מורכבים
+
+## פתרון בעיות נפוצות
+
+!!! warning "Troubleshooting"
+    **GitHub API rate limiting:**
+
+    - ללא authentication: 60 requests/שעה בלבד
+    - עם token: 5,000 requests/שעה
+    - הגדירו `GITHUB_TOKEN` ושלחו אותו ב-header: `Authorization: Bearer {token}`
+
+    **Context window exceeded:**
+
+    - סננו קבצים בינאריים, lock files, `node_modules/`, `.git/`
+    - הגבילו גודל קובץ בודד (למשל, עד 5,000 תווים)
+    - תעדפו: README > config files > source files > tests
+    - אם עדיין גדול מדי — שלחו רק עץ תיקיות + README
+
+    **Repos גדולים — timeout:**
+
+    - השתמשו ב-GitHub API (לא cloning) — מהיר יותר
+    - הגבילו מספר קבצים שקוראים (50-100 המשמעותיים ביותר)
+    - הוסיפו timeout לכל request
+
+    **Environment variable לא מוגדר:**
+
+    - וודאו ש-`ANTHROPIC_API_KEY` (או מפתח אחר) מוגדר: `echo $ANTHROPIC_API_KEY`
+    - ב-Python: `os.environ.get("KEY")` מחזיר `None` בשקט. השתמשו ב-`os.environ["KEY"]` כדי לקבל שגיאה ברורה
+
+    **JSON parsing fails:**
+
+    - LLMs לפעמים עוטפים JSON ב-markdown (` ```json ... ``` `). חלצו את ה-JSON עם regex
+    - הוסיפו `"Return ONLY valid JSON"` ל-prompt
+    - השתמשו ב-`tool_use` עם `tool_choice` לקבלת structured output מובטח
+
 ## טיפים
 
 !!! example "שלבי עבודה מומלצים"
