@@ -42,7 +42,7 @@ const client = new Anthropic();
 
 async function generateExplanation(code: string): Promise<string> {
   const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     messages: [
       {
@@ -76,7 +76,7 @@ console.log(explanation);
 
 ### פרמטרים חשובים
 
-- **`model`** — איזה מודל להשתמש. `claude-sonnet-4-20250514` הוא האיזון הטוב ביותר בין מהירות, איכות ועלות. `claude-opus-4-0-20250514` לאיכות מקסימלית
+- **`model`** — איזה מודל להשתמש. `claude-sonnet-5` הוא האיזון הטוב ביותר בין מהירות, איכות ועלות. `claude-opus-4-8` לאיכות מקסימלית
 - **`max_tokens`** — מגבלה על אורך התשובה. חשוב להגדיר — אחרת המודל עלול לייצר תשובות ארוכות מדי ולעלות יותר
 - **`temperature`** — בין 0 ל-1. ערך נמוך (0) = תשובות עקביות ודטרמיניסטיות. ערך גבוה (1) = יותר יצירתיות ומגוון. לקוד ולמשימות מדויקות — השתמשו ב-0
 - **`system`** — הוראות מערכת שמגדירות את התנהגות המודל. מקום מצוין להגדיר persona, פורמט תשובה, ושפה
@@ -122,7 +122,7 @@ async function callWithRetry(
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const message = await client.messages.create({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-5",
         max_tokens: 1024,
         messages: [{ role: "user", content: `Explain this code:\n\n${code}` }],
       });
@@ -176,7 +176,7 @@ const client = new Anthropic();
 
 async function extractProductInfo(reviewText: string) {
   const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     tools: [
       {
@@ -328,7 +328,7 @@ async function answerQuestion(question: string): Promise<string> {
     .join("\n\n");
 
   const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 512,
     system:
       "You are a helpful customer support assistant. Answer based ONLY on the provided documents. If the answer is not in the documents, say so.",
@@ -375,7 +375,7 @@ async function streamExplanation(code: string): Promise<string> {
   let fullResponse = "";
 
   const stream = await client.messages.stream({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     messages: [
       {
@@ -417,11 +417,11 @@ LLM APIs מתומחרים לפי **tokens** (יחידות טקסט, בערך 3/4
 - **Input tokens** — מה שאתם שולחים (prompt + context)
 - **Output tokens** — מה שהמודל מייצר (התשובה)
 
-תמחור משוער (נכון ל-2025, בדקו מחירים עדכניים):
+תמחור משוער (נכון ל-2026, בדקו מחירים עדכניים):
 
 - **Claude Sonnet** — $3 per 1M input tokens, $15 per 1M output tokens
-- **Claude Opus** — $15 per 1M input tokens, $75 per 1M output tokens
-- **Claude Haiku** — $0.25 per 1M input tokens, $1.25 per 1M output tokens
+- **Claude Opus** — $5 per 1M input tokens, $25 per 1M output tokens
+- **Claude Haiku** — $1 per 1M input tokens, $5 per 1M output tokens
 
 ### מחשבון עלויות פשוט
 
@@ -436,9 +436,9 @@ interface CostEstimate {
 
 // מחירים לפי מיליון tokens
 const PRICING: Record<string, { input: number; output: number }> = {
-  "claude-sonnet-4-20250514": { input: 3, output: 15 },
-  "claude-opus-4-0-20250514": { input: 15, output: 75 },
-  "claude-haiku-3-5-20241022": { input: 0.25, output: 1.25 },
+  "claude-sonnet-5": { input: 3, output: 15 },
+  "claude-opus-4-8": { input: 5, output: 25 },
+  "claude-haiku-4-5": { input: 1, output: 5 },
 };
 
 function estimateCost(
@@ -462,7 +462,7 @@ function estimateCost(
 }
 
 // דוגמה: 1000 קריאות עם 500 input tokens ו-200 output tokens כל אחת
-const estimate = estimateCost("claude-sonnet-4-20250514", 500_000, 200_000);
+const estimate = estimateCost("claude-sonnet-5", 500_000, 200_000);
 console.log(`Estimated cost for 1000 calls: $${estimate.totalCost.toFixed(4)}`);
 // Estimated cost for 1000 calls: $0.0045
 ```
@@ -484,7 +484,7 @@ const client = new Anthropic();
 
 async function callWithTracking(prompt: string) {
   const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
   });
@@ -494,7 +494,7 @@ async function callWithTracking(prompt: string) {
   console.log(`Output tokens: ${message.usage.output_tokens}`);
 
   const cost = estimateCost(
-    "claude-sonnet-4-20250514",
+    "claude-sonnet-5",
     message.usage.input_tokens,
     message.usage.output_tokens
   );
@@ -545,7 +545,7 @@ const client = new Anthropic();
 async function explainCode(code: string): Promise<string> {
   // TODO: implement
   // 1. Call client.messages.create with:
-  //    - model: "claude-sonnet-4-20250514"
+  //    - model: "claude-sonnet-5"
   //    - max_tokens: 1024
   //    - system prompt that tells Claude to be a helpful code explainer
   //    - user message with the code
@@ -611,7 +611,7 @@ async function explainCodeStructured(
   code: string
 ): Promise<CodeExplanation> {
   const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     tools: [
       {
@@ -733,7 +733,7 @@ async function explainCodeWithStreaming(code: string): Promise<void> {
   console.log("--- Explanation (streaming) ---\n");
 
   const stream = await client.messages.stream({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     system:
       "You are a code explainer. Explain the given code clearly and concisely.",

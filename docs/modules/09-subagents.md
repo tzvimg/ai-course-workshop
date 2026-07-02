@@ -727,7 +727,7 @@ async function parallelExploreWithFallback(task: string) {
 - **Agent חקירה בודד** (Explore, 8-10 turns) — ~50K-100K tokens (~$0.15-$0.30 ב-Sonnet)
 - **Agent כתיבה** (Coder, 15-20 turns) — ~100K-200K tokens (~$0.30-$1.00 ב-Sonnet)
 - **Orchestrator מלא** (explore + plan + implement) — ~200K-500K tokens (~$1-$3 ב-Sonnet)
-- **אותו orchestrator ב-Opus** — פי 5 מ-Sonnet (~$5-$15)
+- **אותו orchestrator ב-Opus** — פי ~1.7 מ-Sonnet (~$1.7-$5)
 
 ### מתי שווה להשתמש ב-sub-agents?
 

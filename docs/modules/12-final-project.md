@@ -156,7 +156,7 @@ client = anthropic.Anthropic(
 def summarize_repo(repo_content: str) -> dict:
     """שולח את תוכן ה-repo ל-LLM ומקבל סיכום מובנה."""
     response = client.messages.create(
-        model="claude-sonnet-4-5-20250929",
+        model="claude-sonnet-5",
         max_tokens=2048,
         messages=[
             {
@@ -213,7 +213,7 @@ def call_llm_with_retry(prompt: str, max_retries: int = 3) -> str:
     for attempt in range(max_retries):
         try:
             response = client.messages.create(
-                model="claude-sonnet-4-5-20250929",
+                model="claude-sonnet-5",
                 max_tokens=2048,
                 messages=[{"role": "user", "content": prompt}]
             )

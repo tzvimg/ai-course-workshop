@@ -70,7 +70,7 @@
 
 - **Anthropic API Key** — [console.anthropic.com](https://console.anthropic.com/)
     - נדרש לעבודה עם Claude Code / Kiro CLI
-    - המודלים שנשתמש בהם: **Claude Sonnet 4.5** (ברירת מחדל), **Claude Opus 4.6** (למשימות מורכבות)
+    - המודלים שנשתמש בהם: **Claude Sonnet 5** (ברירת מחדל), **Claude Opus 4.8** (למשימות מורכבות)
     - עלות משוערת לסדנה: $5–$15 (תלוי בשימוש)
 
 - **OpenAI API Key** (אופציונלי) — [platform.openai.com](https://platform.openai.com/)

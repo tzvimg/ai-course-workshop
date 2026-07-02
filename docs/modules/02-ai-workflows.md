@@ -106,7 +106,7 @@
 | מודל | רמת עלות | עלות משוערת (API, לכל מיליון tokens) | מתאים ל- |
 |---|---|---|---|
 | **Claude Sonnet** | נמוכה | ~$3 input / ~$15 output | רוב המשימות היומיומיות |
-| **Claude Opus** | גבוהה | ~$15 input / ~$75 output | משימות מורכבות, ארכיטקטורה, debugging קשה |
+| **Claude Opus** | גבוהה | ~$5 input / ~$25 output | משימות מורכבות, ארכיטקטורה, debugging קשה |
 | **GPT-4o** | בינונית | ~$2.5 input / ~$10 output | אלטרנטיבה, תלוי בכלי |
 
 !!! info "Context window = עלות"
