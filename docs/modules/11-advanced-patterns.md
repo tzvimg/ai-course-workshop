@@ -42,7 +42,7 @@ const SYSTEM_PROMPT = `אתה code reviewer מומחה. אתה בודק קוד T
 ... (עוד 500 שורות של הנחיות)`;
 
 const response = await client.messages.create({
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-5",
   max_tokens: 1024,
   system: [
     {
@@ -163,7 +163,7 @@ async function llmJudge(
   criteria: string
 ): Promise<{ score: number; reasoning: string }> {
   const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 256,
     messages: [
       {
@@ -214,7 +214,7 @@ async function runEval(cases: EvalCase[]): Promise<EvalResult[]> {
     const start = Date.now();
 
     const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-5",
       max_tokens: 1024,
       messages: [{ role: "user", content: testCase.input }],
     });
@@ -302,7 +302,7 @@ Hallucination קורה כשמודל AI מייצר מידע שנשמע משכנע
 
 ```typescript
 const response = await client.messages.create({
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-5",
   max_tokens: 1024,
   system: `When answering, always cite your sources.
 If you reference a function or API, specify the exact package and version.
@@ -327,7 +327,7 @@ const [response1, response2] = await Promise.all([
 
 ```typescript
 const response = await client.messages.create({
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-5",
   max_tokens: 1024,
   messages: [
     {
@@ -417,7 +417,7 @@ const prompt = `${systemInstructions}\n\nUser query: ${userInput}\n\nDocuments: 
 
 // ככה — הפרדה ברורה בין system, documents, user:
 const response = await client.messages.create({
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-5",
   max_tokens: 1024,
   system: systemInstructions,  // הוראות מערכת — נפרדות
   messages: [
@@ -616,7 +616,7 @@ jobs:
 
             // הגבלת עלויות: max 4096 tokens לכל review
             const response = await client.messages.create({
-              model: "claude-sonnet-4-20250514",
+              model: "claude-sonnet-5",
               max_tokens: 4096,
               system: `You are a code reviewer. Review the following PR diff.
           Focus on: bugs, security issues, performance problems, and readability.
@@ -733,7 +733,7 @@ const testCases: TestCase[] = [
 
 async function explainCode(code: string, language: string): Promise<string> {
   const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     system:
       "You are a code explainer. Explain the given code clearly and concisely. " +
@@ -784,7 +784,7 @@ async function evaluateCase(tc: TestCase): Promise<EvalResult> {
 
   // LLM judge
   const judgeResponse = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 128,
     messages: [
       {
@@ -893,7 +893,7 @@ async function reviewDiff(diff: string): Promise<ReviewComment[]> {
       : diff;
 
   const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-5",
     max_tokens: 4096,
     system: `You are a code reviewer. Review the git diff provided.
 Focus ONLY on:
