@@ -66,18 +66,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 6: Agentic Coding Loop — Automating the Loop
-- The shift from writing prompts to designing loops that write prompts for you
-- A minimal bash loop: prompt the agent, check completion, repeat
-- Objective verification vs. self-reported completion (maker/checker pattern)
-- The five building blocks of a reliable loop: scheduling, isolated environments, persistent state, separate verification, controlled external connectors
-- Guardrails: iteration caps, cost budgets, timeouts, sandboxing, human-in-the-loop checkpoints
-
-**Exercise:** Build a minimal agentic coding loop that re-prompts an agent against a failing test suite, then harden it with a state file and objective (test-based) completion checks.
-
----
-
-## Module 7: MCP Servers — Extending Agent Capabilities
+## Module 6: MCP Servers — Extending Agent Capabilities
 - What is MCP (Model Context Protocol) and why it exists
 - Architecture: client/server, transports (stdio, Streamable HTTP)
 - Capabilities: Tools, Resources, Prompts
@@ -88,7 +77,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 8: Skills — Automating Workflows
+## Module 7: Skills — Automating Workflows
 - What are Skills (custom slash commands for Claude Code)
 - Anatomy of a skill file: description, instructions, arguments
 - Using existing community skills
@@ -99,7 +88,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 9: Sub-Agents — Orchestrating Multiple Agents
+## Module 8: Sub-Agents — Orchestrating Multiple Agents
 - What are sub-agents and when to use them
 - Patterns for multi-agent orchestration
 - Delegating tasks to specialized agents
@@ -109,7 +98,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 10: Building AI-Powered Features
+## Module 9: Building AI-Powered Features
 - Integrating LLM APIs into your applications
 - RAG (Retrieval-Augmented Generation) basics
 - Structured outputs and function calling
@@ -120,7 +109,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 11: Advanced Patterns & Production Concerns
+## Module 10: Advanced Patterns & Production Concerns
 - Prompt caching and optimization
 - Evaluation and testing AI outputs
 - Handling hallucinations and errors gracefully
@@ -128,6 +117,17 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 - CI/CD integration with AI tools
 
 **Exercise:** Add AI-powered code review to a CI pipeline.
+
+---
+
+## Module 11: Agentic Coding Loop — Automating the Loop
+- The shift from writing prompts to designing loops that write prompts for you
+- A minimal bash loop: prompt the agent, check completion, repeat
+- Objective verification vs. self-reported completion (maker/checker pattern)
+- The five building blocks of a reliable loop: scheduling, isolated environments, persistent state, separate verification, controlled external connectors
+- Guardrails: iteration caps, cost budgets, timeouts, sandboxing, human-in-the-loop checkpoints
+
+**Exercise:** Build a minimal agentic coding loop that re-prompts an agent against a failing test suite, then harden it with a state file and objective (test-based) completion checks.
 
 ---
 
