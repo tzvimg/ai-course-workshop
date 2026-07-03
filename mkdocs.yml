@@ -71,10 +71,11 @@ nav:
     - "4. Plan Mode — תכנון פיצ׳רים מורכבים": modules/04-plan-mode.md
     - "5. Steering — ניווט ה-Agent להצלחה": modules/05-steering.md
     - "6. בניית Coding Agent": modules/06-agentic-coding.md
-    - "7. שרתי MCP — הרחבת יכולות ה-Agent": modules/07-mcp-servers.md
-    - "8. Skills — אוטומציה של תהליכי עבודה": modules/08-skills.md
-    - "9. Sub-Agents — תזמור agents מרובים": modules/09-subagents.md
-    - "10. בניית פיצ׳רים עם AI": modules/10-building-ai-features.md
-    - "11. דפוסים מתקדמים": modules/11-advanced-patterns.md
-    - "12. פרויקט מסכם — GitHub Repo Summarizer": modules/12-final-project.md
+    - "7. Agentic Coding Loop — אוטומציה של הלולאה": modules/07-agentic-coding-loop.md
+    - "8. שרתי MCP — הרחבת יכולות ה-Agent": modules/08-mcp-servers.md
+    - "9. Skills — אוטומציה של תהליכי עבודה": modules/09-skills.md
+    - "10. Sub-Agents — תזמור agents מרובים": modules/10-subagents.md
+    - "11. בניית פיצ׳רים עם AI": modules/11-building-ai-features.md
+    - "12. דפוסים מתקדמים": modules/12-advanced-patterns.md
+    - "13. פרויקט מסכם — GitHub Repo Summarizer": modules/13-final-project.md
   - "📺 שיעורי הקורס": "https://go.merling.co.il/ai-presentation/"
