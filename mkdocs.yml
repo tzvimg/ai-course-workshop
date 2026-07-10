@@ -1,6 +1,8 @@
 site_name: "AI להנדסת תוכנה"
 site_description: "סדנה מעשית שמלמדת מפתחים איך למנף כלי AI להנדסת תוכנה"
-site_url: ""
+site_url: "https://tzvimg.github.io/ai-course-workshop/"
+repo_url: "https://github.com/tzvimg/ai-course-workshop"
+repo_name: "tzvimg/ai-course-workshop"
 
 theme:
   name: material

@@ -294,7 +294,7 @@ Hallucination קורה כשמודל AI מייצר מידע שנשמע משכנע
 - כשהמודל מתבקש לענות על משהו שאין לו מידע עליו
 - כשה-prompt לא ברור או דו-משמעי
 - כשאין context מספיק (למשל, שואלים על internal API בלי לספק documentation)
-- כש-temperature גבוה
+- כשהמשימה דורשת ידע עדכני שאין למודל (אירועים אחרי ה-knowledge cutoff, גרסאות חדשות של ספריות)
 
 ### אסטרטגיות לזיהוי
 
@@ -315,9 +315,11 @@ If you are not sure about something, say "I'm not certain about this".`,
 
 ```typescript
 // הריצו את אותה שאילתה פעמיים והשוו
+// (במודלים הנוכחיים אין פרמטר temperature — פשוט מריצים שוב,
+//  או מנסחים את השאלה בשני ניסוחים שונים)
 const [response1, response2] = await Promise.all([
-  client.messages.create({ /* ... */ temperature: 0 }),
-  client.messages.create({ /* ... */ temperature: 0.3 }),
+  client.messages.create({ /* ... */ }),
+  client.messages.create({ /* ... שאלה בניסוח שונה */ }),
 ]);
 
 // אם התשובות סותרות — סימן אזהרה
@@ -988,7 +990,7 @@ npx tsx scripts/ai-review.ts test-diff.txt
 
 - **Prompt caching** חוסך עד 90% על input tokens בקריאות חוזרות עם system prompt ארוך. הפעילו אותו עם `cache_control: { type: "ephemeral" }` על חלקי ה-prompt שחוזרים על עצמם
 - **Evaluation** הוא לא אופציונלי — בנו eval harness עם שילוב של assert-based testing, LLM-as-judge, ובדיקה ידנית מדגמית. הריצו אותו ב-CI על כל שינוי ב-prompt
-- **Hallucinations** קורים תמיד — הגישה הנכונה היא לא למנוע אותם לגמרי (בלתי אפשרי) אלא לזהות, למזער (structured output, RAG, temperature נמוך) ולתקשר למשתמש (תוויות, confidence, feedback)
+- **Hallucinations** קורים תמיד — הגישה הנכונה היא לא למנוע אותם לגמרי (בלתי אפשרי) אלא לזהות, למזער (structured output, RAG, grounding במקורות) ולתקשר למשתמש (תוויות, confidence, feedback)
 - **Prompt injection** הוא איום אמיתי — הפרידו system מ-user, סננו קלט ופלט, ולעולם אל תשימו secrets ב-prompts
 - **Monitoring** הוא חובה — עקבו אחרי latency, error rate, token usage, עלות ואיכות. בנו dashboard שמראה את הכל
 - **Failure recovery** — השתמשו ב-retry עם exponential backoff, הגדירו fallbacks, ואל תחסמו תהליכים עסקיים בגלל AI שלא זמין

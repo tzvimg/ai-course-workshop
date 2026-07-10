@@ -82,7 +82,7 @@ Everything below is already documented for attendees on the [prerequisites page]
 - [ ] Pre-create a shared GitHub PAT or walk through PAT creation as pre-work if you're keeping the optional GitHub MCP pieces — don't burn group time on token scopes
 - [ ] Have a fallback plan for API outages or a maxed-out shared budget: know who's paying, roughly what $/attendee to expect (~$5–15/attendee per the prerequisites page), and have a backup key ready
 - [ ] Do a full dry run of Module 6 and Module 8 yourself in the week before — they're the most likely to have an environment surprise (SDK version drift, npm registry issues) since they pin specific package versions in the walkthrough
-- [ ] Verify the site builds and renders correctly one more time close to the date (`pip install mkdocs-material && mkdocs serve`) in case content changes land late
+- [ ] Verify the site builds and renders correctly one more time close to the date (`pip install -r requirements.txt && mkdocs serve`) in case content changes land late
 
 ---
 

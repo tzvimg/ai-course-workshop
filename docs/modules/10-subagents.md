@@ -509,7 +509,7 @@ Agent שנתקע ב-loop אינסופי יכול לצרוך tokens ללא הגב
 // הגנה כפולה: maxTurns ברמת ה-agent + timeout ברמת הקוד
 async function runSubAgentSafely(
   prompt: string,
-  options: Partial<ClaudeCodeOptions>
+  options: Partial<Options>
 ) {
   return Promise.race([
     runSubAgent(prompt, {
@@ -548,7 +548,7 @@ const TOKEN_BUDGET = 500_000; // תקציב מקסימלי
 
 async function runSubAgentWithBudget(
   prompt: string,
-  options: Partial<ClaudeCodeOptions>
+  options: Partial<Options>
 ): Promise<string> {
   if (totalTokensUsed >= TOKEN_BUDGET) {
     throw new Error(
@@ -634,7 +634,7 @@ const plan = await runSubAgent(
 ```typescript
 async function runSubAgentSafe(
   prompt: string,
-  options?: Partial<ClaudeCodeOptions>,
+  options?: Partial<Options>,
   retries = 2
 ): Promise<{ success: boolean; result: string; error?: string }> {
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -791,8 +791,8 @@ kiro
 
 נבנה orchestrator פשוט שמתזמר שני sub-agents באמצעות ה-Claude Agent SDK.
 
-!!! info "לגבי `@anthropic-ai/claude-code-sdk`"
-    ה-SDK זמין באופן פומבי ב-npm ואפשר להתקין אותו עם `npm install @anthropic-ai/claude-code-sdk`. הוא מאפשר להפעיל Claude Code כ-sub-process מתוך קוד TypeScript/JavaScript. נדרש שיהיה Claude Code CLI מותקן על המכונה (`npm install -g @anthropic-ai/claude-code`).
+!!! info "לגבי `@anthropic-ai/claude-agent-sdk`"
+    ה-SDK (לשעבר `@anthropic-ai/claude-code-sdk`) זמין באופן פומבי ב-npm ואפשר להתקין אותו עם `npm install @anthropic-ai/claude-agent-sdk`. הוא מאפשר להפעיל את ה-harness של Claude Code כ-ספרייה מתוך קוד TypeScript/JavaScript, כולל כלים מובנים (Read, Write, Bash, Grep ועוד).
 
 ### שלב 1 — שלד הקוד
 
@@ -807,7 +807,7 @@ kiro
 
 ```
 "צור פרויקט TypeScript עם הקובץ orchestrator.ts.
-הפרויקט צריך להשתמש ב-@anthropic-ai/claude-code-sdk.
+הפרויקט צריך להשתמש ב-@anthropic-ai/claude-agent-sdk.
 התקן את ה-dependencies."
 ```
 
@@ -816,24 +816,25 @@ kiro
 הנה השלד שנעבוד איתו:
 
 ```typescript
-import { query, type ClaudeCodeOptions } from "@anthropic-ai/claude-code-sdk";
+import { query, type Options } from "@anthropic-ai/claude-agent-sdk";
 
 // הגדרת sub-agent
 async function runSubAgent(
   prompt: string,
-  options?: Partial<ClaudeCodeOptions>
+  options?: Partial<Options>
 ): Promise<string> {
-  const defaultOptions: ClaudeCodeOptions = {
-    prompt,
+  const defaultOptions: Options = {
     allowedTools: ["Read", "Glob", "Grep"],  // read-only by default
     maxTurns: 10,
   };
 
-  const mergedOptions = { ...defaultOptions, ...options };
   let result = "";
 
-  for await (const message of query(mergedOptions)) {
-    if (message.type === "result") {
+  for await (const message of query({
+    prompt,
+    options: { ...defaultOptions, ...options },
+  })) {
+    if (message.type === "result" && message.subtype === "success") {
       result = message.result;
     }
   }
@@ -977,19 +978,19 @@ npx tsx orchestrator.ts "Add error handling middleware"
 
 ```typescript
 // agent שיכול רק לחפש — אפילו לא לקרוא קבצים שלמים
-const searchOnly: ClaudeCodeOptions = {
+const searchOnly: Options = {
   allowedTools: ["Glob", "Grep"],
   maxTurns: 5,
 };
 
 // agent שיכול לקרוא ולכתוב אבל לא להריץ פקודות
-const readWrite: ClaudeCodeOptions = {
+const readWrite: Options = {
   allowedTools: ["Read", "Write", "Edit", "Glob", "Grep"],
   maxTurns: 15,
 };
 
 // agent עם גישה מלאה — כולל הרצת shell commands
-const fullAccess: ClaudeCodeOptions = {
+const fullAccess: Options = {
   allowedTools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
   maxTurns: 25,
 };
@@ -998,12 +999,12 @@ const fullAccess: ClaudeCodeOptions = {
 ### הגבלת iterations
 
 ```typescript
-const cautious: ClaudeCodeOptions = {
+const cautious: Options = {
   prompt: "...",
   maxTurns: 5,   // מקסימום 5 סיבובים — למשימות קצרות
 };
 
-const thorough: ClaudeCodeOptions = {
+const thorough: Options = {
   prompt: "...",
   maxTurns: 30,  // יותר סיבובים — למשימות מורכבות
 };
@@ -1111,4 +1112,4 @@ const contextAware = await runSubAgent(
 - **דפוסי תזמור**: Fan-out (מקבילי), Pipeline (סדרתי), Supervisor (עם פיקוח)
 - **מקביליות** עם `Promise.all` חוסכת זמן כשהמשימות עצמאיות
 - **אל תסבכו** — agent בודד שעובד טוב עדיף על מערכת multi-agent מיותרת
-- ה-Claude Agent SDK (`@anthropic-ai/claude-code-sdk`) מאפשר לבנות orchestrators מותאמים אישית
+- ה-Claude Agent SDK (`@anthropic-ai/claude-agent-sdk`) מאפשר לבנות orchestrators מותאמים אישית

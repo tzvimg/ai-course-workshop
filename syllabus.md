@@ -55,18 +55,27 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 5: Agentic Coding — AI as Your Pair Programmer
-- CLI agents: Claude Code, Aider, Codex
-- IDE agents: Cursor, Copilot, Windsurf
-- Setting up effective project context (CLAUDE.md, .cursorrules, etc.)
-- Multi-step task delegation
-- When to trust and when to verify
+## Module 5: Steering — Navigating the Agent to Success
+- The difference between a good prompt and effective ongoing steering
+- Using compilation, tests, and verification so the agent can check its own work
+- Defining clear, measurable goals the agent can self-verify
+- Building automatic feedback loops with the agent's own capabilities (running commands, reading output)
 
-**Exercise:** Use an agentic tool to implement a feature end-to-end, from spec to tests to PR.
+**Exercise:** Steer an agent through a task using verification-driven feedback loops.
 
 ---
 
-## Module 6: Agentic Coding Loop — Automating the Loop
+## Module 6: Building a Coding Agent from Scratch
+- The agent loop architecture and how it differs from plain chat
+- Implementing a full agent loop with basic tools: read, write, prompt, command
+- The protocol between the model and the agent (tool calls and tool results)
+- Common patterns and pitfalls when building coding agents
+
+**Exercise:** Implement a working agent loop end-to-end and run it on a real task.
+
+---
+
+## Module 7: Agentic Coding Loop — Automating the Loop
 - The shift from writing prompts to designing loops that write prompts for you
 - A minimal bash loop: prompt the agent, check completion, repeat
 - Objective verification vs. self-reported completion (maker/checker pattern)
@@ -77,7 +86,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 7: MCP Servers — Extending Agent Capabilities
+## Module 8: MCP Servers — Extending Agent Capabilities
 - What is MCP (Model Context Protocol) and why it exists
 - Architecture: client/server, transports (stdio, Streamable HTTP)
 - Capabilities: Tools, Resources, Prompts
@@ -88,7 +97,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 8: Skills — Automating Workflows
+## Module 9: Skills — Automating Workflows
 - What are Skills (custom slash commands for Claude Code)
 - Anatomy of a skill file: description, instructions, arguments
 - Using existing community skills
@@ -99,7 +108,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 9: Sub-Agents — Orchestrating Multiple Agents
+## Module 10: Sub-Agents — Orchestrating Multiple Agents
 - What are sub-agents and when to use them
 - Patterns for multi-agent orchestration
 - Delegating tasks to specialized agents
@@ -109,7 +118,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 10: Building AI-Powered Features
+## Module 11: Building AI-Powered Features
 - Integrating LLM APIs into your applications
 - RAG (Retrieval-Augmented Generation) basics
 - Structured outputs and function calling
@@ -120,7 +129,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 11: Advanced Patterns & Production Concerns
+## Module 12: Advanced Patterns & Production Concerns
 - Prompt caching and optimization
 - Evaluation and testing AI outputs
 - Handling hallucinations and errors gracefully
@@ -131,7 +140,7 @@ A practical, hands-on workshop teaching developers how to effectively leverage A
 
 ---
 
-## Module 12: Capstone Project
+## Module 13: Capstone Project — GitHub Repo Summarizer
 Participants build a real tool or feature using everything learned:
 - Choose a problem from their actual work
 - Design the AI integration approach
@@ -141,6 +150,6 @@ Participants build a real tool or feature using everything learned:
 ---
 
 ## Workshop Logistics
-- **Duration:** Can be delivered as 2-day intensive or 12-week series (1 module/week)
+- **Duration:** Can be delivered as 2-day intensive or 13-week series (1 module/week)
 - **Format:** Each module = 30 min lecture + 60 min hands-on + 15 min discussion
 - **Tools needed:** Laptop with IDE, API keys for Claude/OpenAI, Git
