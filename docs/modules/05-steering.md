@@ -338,7 +338,7 @@ graph LR
 
 **2. התערבות ידנית:**
 
-אם ה-agent כבר בלולאה, לחצו `Ctrl+C` (או Escape ב-Claude Code) כדי לעצור אותו. אז תנו לו כיוון חדש:
+אם ה-agent כבר בלולאה, לחצו `Ctrl+C` כדי לעצור אותו. אז תנו לו כיוון חדש:
 
 ```
 > הגישה הזו לא עובדת. הבעיה היא ש-X.
@@ -387,13 +387,22 @@ graph LR
 
 ## תרגיל מעשי
 
+!!! tip "רוצים לתרגל על פרויקט אמיתי?"
+    בריפו של הסדנה יש פרויקט מוכן עם בדיקות שנכשלות בכוונה — מצוין לתרגול steering מבוסס-בדיקות:
+
+    ```bash
+    git clone https://github.com/tzvimg/ai-course-workshop.git
+    cd ai-course-workshop/examples/buggy-todo-api
+    npm install && npm test   # 3 בדיקות נכשלות — תנווטו את ה-agent לתקן אותן
+    ```
+
 ### תרגיל 1: Compile-Driven Development (25 דקות)
 
 צרו פרויקט TypeScript פשוט:
 
 ```bash
 mkdir ~/missions/steering-practice && cd $_
-kiro
+kiro-cli
 ```
 
 ```
@@ -415,7 +424,7 @@ kiro
 
 ```bash
 mkdir ~/missions/tdd-steering && cd $_
-kiro
+kiro-cli
 ```
 
 ```
@@ -446,7 +455,7 @@ kiro
 
 ```bash
 mkdir ~/missions/clear-targets && cd $_
-kiro
+kiro-cli
 ```
 
 ```
@@ -501,7 +510,7 @@ kiro
 1. האם יש מצב שבו steering מוגזם? מתי עדיף לתת ל-agent "לרוץ חופשי"?
 2. מה עושים כשה-agent "נתקע" בלולאה — מריץ test, נכשל, מתקן, נכשל שוב?
 3. איך דפוסי steering משתנים בין שפות? (TypeScript עם compiler חזק vs. Python דינמי)
-4. איך תשלבו steering ב-CLAUDE.md / rules כדי שזה יקרה אוטומטית?
+4. איך תשלבו steering בקבצי ה-steering/rules של הפרויקט (`.kiro/steering/`) כדי שזה יקרה אוטומטית?
 
 ## נקודות מפתח
 

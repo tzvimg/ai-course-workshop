@@ -30,11 +30,11 @@
 זה ה-**agentic coding loop**. במקום "מפעיל agent", אתם הופכים ל"מתכנן/ת לולאות" — התפקיד עובר מלהקליד הוראות בזמן אמת, לעיצוב המערכת שמחליטה מתי להקליד את ההוראה הבאה.
 
 !!! tip "אתם כבר ראיתם את זה"
-    ה-skill `/loop` שזמין בסביבת הסדנה עושה בדיוק את זה: מריץ prompt (או slash command) על טיימר קבוע, או עד שתנאי מסוים מתקיים. זה לא קסם — זה תוכנית קטנה שעוטפת agent, בדיוק כמו מה שנבנה בהמשך המודול.
+    פיצ'רים כמו headless mode ב-Kiro CLI, בוטים שמגיבים ל-issues ב-GitHub, ו-AI review אוטומטי ב-CI — כולם בנויים על אותו רעיון: תוכנית קטנה שעוטפת agent ומפעילה אותו בלי אדם בלולאה. זה בדיוק מה שנבנה בהמשך המודול.
 
 ## הגרסה המינימלית: לולאת Bash
 
-הגרסה הכי פשוטה שעדיין שימושית היא כמה שורות bash. אין state מורכב, אין verification חכם — רק לולאה שקוראת ל-agent במצב non-interactive עד שהוא מדווח שסיים, או עד שמגבלת האיטרציות מתמלאת:
+הגרסה הכי פשוטה שעדיין שימושית היא כמה שורות bash סביב **ה-agent שבניתם במודול 6** (`agent.ts`). אין state מורכב, אין verification חכם — רק לולאה שקוראת ל-agent עד שהוא מדווח שסיים, או עד שמגבלת האיטרציות מתמלאת:
 
 ```bash
 #!/usr/bin/env bash
@@ -47,7 +47,7 @@ TASK="תקן את הבדיקות הכושלות בתיקיית tests/. כשכל 
 for i in $(seq 1 "$MAX_ITERATIONS"); do
   echo "=== איטרציה $i/$MAX_ITERATIONS ==="
 
-  OUTPUT=$(claude -p "$TASK" --output-format text)
+  OUTPUT=$(npx tsx agent.ts "$TASK")
   echo "$OUTPUT"
 
   if echo "$OUTPUT" | tail -1 | grep -q "$DONE_MARKER"; then
@@ -59,6 +59,15 @@ done
 echo "הגענו למגבלת האיטרציות בלי DONE — נדרשת בדיקה אנושית"
 exit 1
 ```
+
+!!! note "אותו דפוס עם כלי מסחרי"
+    במקום ה-agent שבניתם, אפשר להריץ בלולאה גם את Kiro CLI ב-**headless mode**:
+
+    ```bash
+    kiro-cli chat --no-interactive --trust-tools=read,write "$TASK"
+    ```
+
+    `--no-interactive` מדפיס את התשובה ויוצא במקום לפתוח סשן, ו-`--trust-tools` מגדיר אילו קטגוריות כלים מאושרות אוטומטית (ל-CI יש גם אימות עם `KIRO_API_KEY`, שדורש מנוי Pro). בתרגיל נעבוד עם ה-agent שלנו — הוא שקוף לחלוטין וקל לדבג.
 
 זהו. אין כאן שום דבר שלא ראיתם — זה `for` loop שקורא ל-CLI. אבל שימו לב למה שהוא **לא** עושה: הוא סומך על כך שהאג'נט עצמו ידווח "DONE" באמת בכנות. וזו בדיוק הבעיה הראשונה שצריך לפתור.
 
@@ -81,8 +90,7 @@ MAX_ITERATIONS=10
 for i in $(seq 1 "$MAX_ITERATIONS"); do
   echo "=== איטרציה $i/$MAX_ITERATIONS ==="
 
-  claude -p "תקן את הבדיקות הכושלות בתיקיית tests/. הרץ npm test כדי לוודא." \
-    --output-format text
+  npx tsx agent.ts "תקן את הבדיקות הכושלות בתיקיית tests/. הרץ npm test כדי לוודא."
 
   # אימות אובייקטיבי — לא שואלים את המודל, בודקים בעצמנו
   if npm test --silent; then
@@ -156,7 +164,7 @@ function runTests(): boolean {
 
 async function runLoopIteration(state: LoopState): Promise<LoopState> {
   // maker — האג'נט מבצע את המשימה
-  execSync(`claude -p "${state.task}. זו איטרציה ${state.iteration}."`, {
+  execSync(`npx tsx agent.ts "${state.task}. זו איטרציה ${state.iteration}."`, {
     stdio: "inherit",
   });
 
@@ -206,8 +214,14 @@ async function runLoopIteration(state: LoopState): Promise<LoopState> {
 ## תרגיל מעשי: בניית Agentic Coding Loop
 
 !!! info "דרישות"
-    - Claude Code מותקן ועובד (`claude --version`)
-    - פרויקט עם test suite (אפשר להשתמש בפרויקט מהתרגילים הקודמים, או ליצור אחד עם 2-3 בדיקות כושלות בכוונה)
+    - ה-agent שבניתם במודול 6 (`agent.ts`) עובד, ו-`ANTHROPIC_API_KEY` מוגדר
+    - פרויקט עם test suite שנכשל — השתמשו בפרויקט המוכן של הסדנה:
+      ```bash
+      git clone https://github.com/tzvimg/ai-course-workshop.git
+      cd ai-course-workshop/examples/buggy-todo-api
+      npm install && npm test   # אמורות להיכשל 3 בדיקות — זה בכוונה
+      ```
+    - ב-Windows: הריצו את סקריפטי ה-bash דרך **Git Bash**
 
 ### שלב 1 — לולאת Bash מינימלית (15 דקות)
 
@@ -228,7 +242,7 @@ async function runLoopIteration(state: LoopState): Promise<LoopState> {
 
 ### שלב 4 — דיון (10 דקות)
 
-- מה ההבדל בין הלולאה שבניתם לבין skill כמו `/loop`?
+- מה ההבדל בין הלולאה שבניתם לבין headless mode של כלי מסחרי כמו Kiro CLI? מה הייתם מקבלים "בחינם" ומה הייתם מאבדים?
 - אילו סוגי משימות **לא** מתאימות ללולאה אוטונומית, גם עם כל ההגנות?
 - איפה בדיוק הייתם שמים checkpoint לאישור אנושי בפרויקט אמיתי שלכם?
 

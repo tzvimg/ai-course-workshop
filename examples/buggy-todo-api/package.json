@@ -1,0 +1,24 @@
+{
+  "name": "buggy-todo-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workshop starter project: a small Todo API with intentionally failing tests. Used in modules 3, 5 and 7.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "express": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
+}

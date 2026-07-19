@@ -15,8 +15,8 @@
 
 - **שפה:** Python 3.10+
 - **Web framework:** FastAPI או Flask (לפי בחירתכם)
-- **LLM:** Nebius Token Factory API או ספק LLM חלופי
-- אתם בוחרים איזה מודל להשתמש בו מתוך המודלים הזמינים
+- **LLM:** Anthropic API (המפתח שכבר יש לכם מהמודולים הקודמים)
+- אתם בוחרים איזה מודל להשתמש בו — Haiku, Sonnet, או Opus — ומנמקים את הבחירה
 
 ---
 
@@ -91,7 +91,7 @@ curl -X POST http://localhost:8000/summarize \
   -d '{"github_url": "https://github.com/psf/requests"}'
 ```
 
-- מפתח ה-API מוגדר דרך **environment variable** (למשל `NEBIUS_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`)
+- מפתח ה-API מוגדר דרך **environment variable** (`ANTHROPIC_API_KEY`)
 - **אל תעשו hardcode למפתחות API**
 
 ---
@@ -110,7 +110,7 @@ curl -X POST http://localhost:8000/summarize \
 
 ## קריטריונים להערכה
 
-ההגשה מדורגת בסקאלה של 10 נקודות. **לא צריך ציון מושלם כדי לעבור** — אנחנו מחפשים פתרון עובד עם החלטות מחושבות.
+ההגשה מדורגת בסקאלה של 100 נקודות. **לא צריך ציון מושלם כדי לעבור** — אנחנו מחפשים פתרון עובד עם החלטות מחושבות.
 
 ### קריטריונים חוסמים
 
@@ -119,12 +119,7 @@ curl -X POST http://localhost:8000/summarize \
 - **הקוד לא רץ** — לא מצליחים להריץ את השרת לפי ההוראות ב-README
 - **אין endpoint עובד** — `POST /summarize` לא מחזיר תשובה תקינה
 - **מפתחות API מוטמעים בקוד** — hardcoded API keys
-
-### קריטריונים חוסמים נוספים
-
-אם אחד מאלה לא מתקיים, ההגשה לא תיבדק:
-
-- **שימוש ב-LLM** — חייבים להשתמש ב-Nebius Token Factory API (או ספק LLM חלופי) לקריאות ה-LLM
+- **אין שימוש ב-LLM** — הסיכום חייב להיווצר על ידי קריאה אמיתית ל-LLM API, לא על ידי לוגיקה מקומית
 
 ### קריטריונים לניקוד
 
@@ -276,7 +271,7 @@ def call_llm_with_retry(prompt: str, max_retries: int = 3) -> str:
 
     **Environment variable לא מוגדר:**
 
-    - וודאו ש-`ANTHROPIC_API_KEY` (או מפתח אחר) מוגדר: `echo $ANTHROPIC_API_KEY`
+    - וודאו ש-`ANTHROPIC_API_KEY` מוגדר: `echo $ANTHROPIC_API_KEY` (ב-PowerShell: `echo $env:ANTHROPIC_API_KEY`)
     - ב-Python: `os.environ.get("KEY")` מחזיר `None` בשקט. השתמשו ב-`os.environ["KEY"]` כדי לקבל שגיאה ברורה
 
     **JSON parsing fails:**
@@ -306,8 +301,8 @@ def call_llm_with_retry(prompt: str, max_retries: int = 3) -> str:
 
 פרויקט זה משלב ידע מכל הסדנה:
 
-- **מודול 2 (Prompt Engineering)** — כתיבת prompt יעיל ל-LLM לסיכום repositories
-- **מודול 3 (כלי פיתוח AI)** — שימוש בכלי AI לפיתוח ה-service עצמו
-- **מודול 4 (Coding Agent)** — בניית ה-agent שמנתח את ה-repository
-- **מודול 5 (בניית פיצ׳רים עם AI)** — שילוב LLM API בפרודקשן
-- **מודול 6 (דפוסים מתקדמים)** — טיפול ב-context window, caching, error handling
+- **מודול 1 (Prompt Engineering)** — כתיבת prompt יעיל ל-LLM לסיכום repositories
+- **מודולים 2–5 (כלי פיתוח AI, Kiro CLI, תכנון ו-steering)** — שימוש בכלי AI לפיתוח ה-service עצמו
+- **מודול 6 (בניית Coding Agent)** — עבודה ישירה מול ה-Anthropic API
+- **מודול 11 (בניית פיצ׳רים עם AI)** — שילוב LLM API באפליקציה אמיתית
+- **מודול 12 (דפוסים מתקדמים)** — טיפול ב-context window, caching, error handling

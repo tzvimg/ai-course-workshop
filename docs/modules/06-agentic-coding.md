@@ -30,7 +30,7 @@ User → Model → Tool Call → Tool Result → Model → Tool Call → ... →
 
 ה-agent נותן למודל **כלים** (tools). במקום רק לענות בטקסט, המודל יכול *לבקש* לבצע פעולות: לקרוא קובץ, לכתוב קובץ, להריץ פקודה. ה-agent מבצע את הפעולה ומחזיר את התוצאה למודל, והמודל ממשיך — עד שהוא מחליט שסיים.
 
-> זה בדיוק מה שקורה כש-Claude Code או Cursor עובדים. הם לא קסם — הם loop פשוט עם כלים.
+> זה בדיוק מה שקורה כש-Kiro CLI או Cursor עובדים. הם לא קסם — הם loop פשוט עם כלים.
 
 ## הארכיטקטורה
 
@@ -192,9 +192,19 @@ User → Model → Tool Call → Tool Result → Model → Tool Call → ... →
 
 ### הגדרה כ-environment variable
 
-```bash
-export ANTHROPIC_API_KEY="sk-ant-api03-..."
-```
+=== "macOS / Linux"
+
+    ```bash
+    export ANTHROPIC_API_KEY="sk-ant-api03-..."
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    $env:ANTHROPIC_API_KEY = "sk-ant-api03-..."
+    ```
+
+    זה תקף לחלון ה-terminal הנוכחי בלבד. להגדרה קבועה: `setx ANTHROPIC_API_KEY "sk-ant-api03-..."` (ואז פתחו terminal חדש).
 
 !!! danger "אל תשמרו מפתחות בקוד"
     - **לעולם** אל תכתבו את המפתח ישירות בקוד
@@ -370,17 +380,29 @@ Think step by step.`;
       }
     }
 
-    // 5. הוספת התוצאות ל-messages וחזרה ללולאה
+    // 6. הוספת התוצאות ל-messages וחזרה ללולאה
     messages.push({ role: "user", content: toolResults });
   }
 }
+
+// הרצה: npx tsx agent.ts "המשימה שלך"
+const task = process.argv[2];
+if (!task) {
+  console.error('Usage: npx tsx agent.ts "<task>"');
+  process.exit(1);
+}
+agentLoop(task);
 ```
 
-### שלב 2 — השלימו את הכלים (20 דקות)
+שמרו את הקובץ בשם `agent.ts`. ההרצה מקבלת את המשימה כארגומנט — זה יהיה חשוב במודול 7, כשנפעיל את ה-agent הזה מתוך לולאה אוטומטית.
 
-1. הוסיפו את הכלים `write_file`, `run_command` ו-`ask_user` ל-tools array
-2. ממשו את `ask_user` ב-`executeTool` (רמז: `readline` interface)
-3. הוסיפו טיפול בשגיאות ב-`executeTool` — אם כלי נכשל, החזירו את השגיאה כ-string במקום לקרוס
+### שלב 2 — הרחיבו את הכלים (20 דקות)
+
+השלד למעלה כבר כולל את ארבעת הכלים הבסיסיים. עכשיו הרחיבו אותו בעצמכם:
+
+1. הוסיפו כלי חמישי: `list_files` — מקבל path ומחזיר את רשימת הקבצים בתיקייה (רמז: `fs.readdirSync`). אל תשכחו להוסיף גם ל-tools array וגם ל-`executeTool`
+2. הוסיפו כלי שישי: `edit_file` — מקבל path, `old_text` ו-`new_text`, ומחליף את הטקסט בקובץ. למה זה עדיף על `write_file` לשינויים קטנים? (רמז: tokens)
+3. שפרו את הטיפול בשגיאות: מה קורה כשקוראים קובץ שלא קיים? וודאו שהשגיאה חוזרת למודל כטקסט ולא מקריסה את התוכנית
 
 ### שלב 3 — בדקו את ה-Agent (20 דקות)
 
@@ -459,5 +481,5 @@ try {
 - Agent loop הוא פשוט: `call model → execute tools → repeat`
 - המודל לא מריץ כלים — הוא **מבקש** מה-agent להריץ אותם
 - ה-agent שולט: הוא מחליט אילו כלים לאפשר, מה לאשר, ומתי לעצור
-- כל כלי AI agent (Claude Code, Cursor, Aider) עובד על אותו העיקרון — רק עם יותר כלים ויותר הגנות
+- כל כלי AI agent (Kiro CLI, Cursor, Aider) עובד על אותו העיקרון — רק עם יותר כלים ויותר הגנות
 - ה-system prompt הוא קריטי — הוא קובע את ההתנהגות של ה-agent

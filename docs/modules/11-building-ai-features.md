@@ -525,9 +525,17 @@ npx tsc --init
 
 וודאו שיש לכם API key:
 
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-```
+=== "macOS / Linux"
+
+    ```bash
+    export ANTHROPIC_API_KEY=sk-ant-...
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    $env:ANTHROPIC_API_KEY = "sk-ant-..."
+    ```
 
 ---
 

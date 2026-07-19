@@ -7,7 +7,7 @@
 
 בסוף המודול הזה, תוכלו:
 
-- לנווט בביטחון בכלי פיתוח AI (Kiro, Cursor, Claude Code, Windsurf וכו׳)
+- לנווט בביטחון בכלי פיתוח AI (Kiro, Cursor, Windsurf וכו׳)
 - להבין את העקרונות המשותפים לכל הכלים — בלי קשר לכלי הספציפי
 - לנהל context, הרשאות, כללים וסשנים בצורה יעילה
 - להרחיב את יכולות הכלי עם MCP servers
@@ -26,7 +26,7 @@
 - **פעולות בזמן אמת** — הכלי מראה מה הוא עושה (קורא קובץ, כותב, מריץ פקודה)
 - **אזור אישורים** — חלק מהפעולות דורשות אישור לפני ביצוע
 
-**ב-Kiro** זה ה-AI Panel שנפתח בצד. **ב-Cursor** זה ה-Composer/Chat. **ב-Claude Code** זה ה-terminal עצמו.
+**ב-Kiro** זה ה-AI Panel שנפתח בצד. **ב-Cursor** זה ה-Composer/Chat. **ב-Kiro CLI** זה ה-terminal עצמו.
 
 ### השוואת כלי פיתוח AI פופולריים
 
@@ -44,11 +44,11 @@
     - **מתאים במיוחד ל:** מפתחים שרוצים AI משולב בתוך IDE מוכר עם חוויית עריכה חלקה
     - **תמיכה במודלים:** Claude Sonnet, Claude Opus, GPT-4o, Gemini, ועוד — מגוון רחב של ספקים
 
-- **Claude Code**
+- **Kiro CLI**
     - **סוג:** CLI (כלי שורת פקודה)
-    - **חוזקות עיקריות:** agentic לחלוטין — קורא, כותב, מריץ פקודות באופן עצמאי. אין ממשק גרפי שמגביל. SDK לבניית agents מותאמים
-    - **מתאים במיוחד ל:** מפתחים שאוהבים terminal, משימות אוטומציה, CI/CD pipelines, בניית multi-agent systems
-    - **תמיכה במודלים:** Claude Sonnet, Claude Opus (ישירות מ-Anthropic)
+    - **חוזקות עיקריות:** agentic לחלוטין — קורא, כותב, מריץ פקודות באופן עצמאי. אין ממשק גרפי שמגביל. Custom agents, headless mode ל-CI/CD, וחולק הגדרות (`.kiro/`) עם Kiro IDE
+    - **מתאים במיוחד ל:** מפתחים שאוהבים terminal, משימות אוטומציה, CI/CD pipelines
+    - **תמיכה במודלים:** Claude Sonnet, Claude Opus (דרך חשבון Kiro)
 
 - **Windsurf**
     - **סוג:** IDE מבוסס VS Code (fork)
@@ -86,7 +86,7 @@
 </div>
 
 !!! note "נראה שונה בכלי אחר?"
-    הממשק משתנה, אבל **כל הרכיבים האלה קיימים בכל כלי**. ב-Cursor יש Composer עם בורר מודל ו-context. ב-Claude Code הכל דרך ה-terminal עם flags ו-slash commands. העקרון זהה.
+    הממשק משתנה, אבל **כל הרכיבים האלה קיימים בכל כלי**. ב-Cursor יש Composer עם בורר מודל ו-context. ב-Kiro CLI הכל דרך ה-terminal עם flags ו-slash commands. העקרון זהה.
 
 ### בחירת מודל
 
@@ -131,7 +131,7 @@
 כל הכלים מאפשרים לצרף קבצים ל-context בצורה כזו או אחרת:
 
 - **Kiro / Cursor** — גררו קובץ לפאנל, או השתמשו ב-`@` כדי לציין קובץ
-- **Claude Code** — הכלי קורא קבצים אוטומטית לפי הצורך, או ציינו נתיב ב-prompt
+- **Kiro CLI** — הכלי קורא קבצים אוטומטית לפי הצורך, או ציינו נתיב ב-prompt
 - **כולם** — אפשר לצרף תמונות (screenshots, דיאגרמות), URLs, ואפילו שגיאות מה-terminal
 
 ### מעקב אחרי ה-Context
@@ -145,7 +145,7 @@
 **איך לעקוב:**
 
 - **Kiro** — מראה אינדיקטור של ניצול ה-context
-- **Claude Code** — מציג את מספר ה-tokens בשורת הסטטוס
+- **Kiro CLI** — הקלידו `/usage` כדי לראות את ניצול ה-context בסשן
 - **Cursor** — מראה כמה context נשאר
 
 > כשאתם מרגישים שהמודל "הולך לאיבוד" — זה בדרך כלל בגלל שה-context התמלא. פתחו סשן חדש.
@@ -184,8 +184,7 @@
 
 ### השמות משתנים, העיקרון אחד
 
-- **Kiro** — קבצי `.kiro/rules/`
-- **Claude Code** — `CLAUDE.md` בשורש הפרויקט
+- **Kiro (IDE ו-CLI)** — קבצי `.kiro/steering/*.md` — אותם קבצים משרתים את שניהם
 - **Cursor** — `.cursor/rules/` או `.cursorrules`
 - **Windsurf** — `.windsurfrules`
 
@@ -275,7 +274,7 @@
 - Do NOT use `any` type
 ```
 
-**ב-Kiro** — קובץ `.kiro/rules/project.md`:
+**ב-Kiro (IDE וגם CLI)** — קובץ `.kiro/steering/project.md`:
 
 ```markdown
 # Project Rules
@@ -285,7 +284,7 @@
 - Do NOT use `any` type
 ```
 
-**ב-Claude Code** — קובץ `CLAUDE.md`:
+**ב-Windsurf** — קובץ `.windsurfrules`:
 
 ```markdown
 # Project Rules
@@ -300,7 +299,7 @@
 ### מה כן שונה בין כלים?
 
 - **חוויית המשתמש** — IDE לעומת CLI, keybindings, ממשק גרפי
-- **פיצ'רים ייחודיים** — Spec mode ב-Kiro, Tab completion ב-Cursor, SDK ב-Claude Code
+- **פיצ'רים ייחודיים** — Spec mode ב-Kiro IDE, Tab completion ב-Cursor, headless mode ו-custom agents ב-Kiro CLI
 - **מודלים זמינים** — לא כל כלי תומך בכל מודל
 - **תמחור** — מנוי חודשי לעומת pay-per-use
 
@@ -365,8 +364,7 @@ AI Tool <--> MCP Client <--> MCP Server <--> External Service
     - **Database URL** — בדרך כלל מופיע ב-dashboard של ספק ה-DB (Supabase, Neon, Railway) או בקובץ `.env` המקומי
     - **כלל חשוב:** לעולם אל תשמרו tokens ישירות בקובץ MCP שנמצא ב-git! השתמשו ב-environment variables או בקובץ `mcp.json` שנמצא ב-`.gitignore`
 
-- **Kiro** — `.kiro/mcp.json`
-- **Claude Code** — `.claude/mcp.json` או `~/.claude/mcp.json` (גלובלי)
+- **Kiro (IDE ו-CLI)** — `.kiro/settings/mcp.json` (פרויקט) או `~/.kiro/settings/mcp.json` (גלובלי)
 - **Cursor** — `.cursor/mcp.json`
 
 ## הרשאות
@@ -408,21 +406,27 @@ AI Tool <--> MCP Client <--> MCP Server <--> External Service
 - תשובה מפורטת חוסכת iterations ותוצאות שגויות
 - אם לא בטוחים, עדיף לענות "אני לא בטוח, תבחר את הגישה שנראית לך הכי נכונה" מאשר להתעלם
 
-## Skills
+## Workflows מוכנים מראש
 
 ### מה זה?
 
-Skills הם "מתכונים" מוכנים מראש — workflows שהמודל יודע לבצע. במקום להסביר בכל פעם "תכתוב לי test", אפשר להגדיר skill של "כתיבת test" שכולל:
+מעבר ל-rules, רוב הכלים מאפשרים להגדיר "מתכונים" — workflows שהמודל יודע לבצע. במקום להסביר בכל פעם "תכתוב לי test", מגדירים פעם אחת workflow של "כתיבת test" שכולל:
 
 - באיזה framework להשתמש
 - מבנה הקובץ
 - naming conventions
 - דוגמאות
 
-### דוגמה ב-Kiro
+### איך זה נראה בכלים שונים
+
+- **Kiro CLI** — **Custom Agents**: קובץ JSON עם הוראות קבועות, כלים והרשאות (נצלול לזה במודול 9)
+- **Kiro IDE** — **Hooks**: workflows שמופעלים אוטומטית על אירועים (שמירת קובץ, יצירת קובץ)
+- **Cursor / אחרים** — notepads, custom modes, וריאציות על אותו רעיון
+
+דוגמה לרוח הדברים — הוראות קבועות ל-workflow של יצירת endpoint:
 
 ```markdown
-# Skill: Create API Endpoint
+# Workflow: Create API Endpoint
 
 ## Steps
 1. Create route handler in `src/routes/`
@@ -435,7 +439,7 @@ Skills הם "מתכונים" מוכנים מראש — workflows שהמודל י
 - Test: __tests__/routes/{name}.test.ts
 ```
 
-Skills חוסכים זמן וגורמים לתוצאות עקביות — במיוחד כשצוות שלם עובד עם אותם כלים.
+Workflows מוגדרים מראש חוסכים זמן וגורמים לתוצאות עקביות — במיוחד כשצוות שלם עובד עם אותם כלים.
 
 ## תרגיל מעשי
 
@@ -474,7 +478,7 @@ Skills חוסכים זמן וגורמים לתוצאות עקביות — במי
 
 5. **קובץ כללים** — צרו קובץ rules לפרויקט עם לפחות 5 כללים
       - זהו את השפה, framework, וכלי testing של הפרויקט
-      - צרו את הקובץ המתאים לכלי שלכם (`.kiro/rules/`, `CLAUDE.md`, `.cursorrules`)
+      - צרו את הקובץ המתאים לכלי שלכם (`.kiro/steering/`, `.cursor/rules/`, `.windsurfrules`)
       - כתבו לפחות 5 כללים: stack, conventions, naming, דברים לא לעשות, מבנה תיקיות
       - שלחו prompt ובדקו: האם המודל מתנהג לפי הכללים?
       - **תוצאה צפויה:** המודל מייצר קוד שתואם את ה-conventions שהגדרתם (למשל, named exports במקום default)

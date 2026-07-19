@@ -34,7 +34,7 @@ Target: 9:00–17:50. This is a full, intensive day — protect the breaks, they
 | 14:50–15:05 | Break | 15 | |
 | 15:05–16:35 | **Module 4** — Plan Mode | 90 | Builds directly on Module 3 — don't let stragglers fall behind here, it compounds into Day 2 |
 | 16:35–16:50 | Break | 15 | |
-| 16:50–17:35 | **Module 9** — Skills | 45 | Trim hands-on to the 2 prebuilt skills + 1 custom skill; skip the 3 debugging scenarios unless the room is ahead of schedule |
+| 16:50–17:35 | **Module 9** — Custom Agents | 45 | Trim hands-on to 1 prebuilt agent + 1 custom agent; skip the 3 debugging scenarios unless the room is ahead of schedule |
 | 17:35–17:50 | Day 1 wrap, preview Day 2 | 15 | Flag: tomorrow is programming-heavy — pair up if you're not a confident TS/Python dev |
 
 ## Day 2 — Building (programming-heavy — pair juniors with seniors)
@@ -76,11 +76,12 @@ You flagged this as a specific concern — some devs have AI-tool experience, so
 Everything below is already documented for attendees on the [prerequisites page](docs/index.md) — this is the facilitator's version: what *you* need to verify before Day 1 starts, since installation problems eat hands-on time fast.
 
 - [ ] Confirm every attendee has Node.js 18+, Git, and an editor installed (send the [quick verification commands](docs/index.md#בדיקת-סביבה-מהירה) a few days ahead, not the morning of)
-- [ ] Confirm every attendee has Kiro CLI (or Claude Code / Cursor) installed and authenticated *before* arriving — this is the single most common time-sink if left for Day 1 morning
+- [ ] Confirm every attendee has Kiro CLI (or Cursor) installed and authenticated *before* arriving — this is the single most common time-sink if left for Day 1 morning
 - [ ] Confirm every attendee has an active Anthropic API key with balance — required starting Module 2, hard-required from Module 6 onward
 - [ ] For Module 13 (or the sprint version): confirm Python 3.10+ is installed if anyone's on macOS/Linux without it by default
 - [ ] Pre-create a shared GitHub PAT or walk through PAT creation as pre-work if you're keeping the optional GitHub MCP pieces — don't burn group time on token scopes
 - [ ] Have a fallback plan for API outages or a maxed-out shared budget: know who's paying, roughly what $/attendee to expect (~$5–15/attendee per the prerequisites page), and have a backup key ready
+- [ ] Verify the starter project works on a clean machine: `cd examples/buggy-todo-api && npm install && npm test` should show **exactly 3 failing / 4 passing** tests. (Facilitator spoiler — the three intentional bugs: `POST /todos` accepts empty/missing titles; `completeTodo` returns an updated copy but never persists it; `deleteTodo` on a missing id does `splice(-1, 1)`, silently deleting the *last* todo and still returning success.)
 - [ ] Do a full dry run of Module 6 and Module 8 yourself in the week before — they're the most likely to have an environment surprise (SDK version drift, npm registry issues) since they pin specific package versions in the walkthrough
 - [ ] Verify the site builds and renders correctly one more time close to the date (`pip install mkdocs-material && mkdocs serve`) in case content changes land late
 

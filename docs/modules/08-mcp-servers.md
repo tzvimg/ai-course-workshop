@@ -8,19 +8,19 @@
 בסוף המודול הזה, תוכלו:
 
 - להבין מה זה Model Context Protocol (MCP) ולמה הוא נוצר
-- להגדיר שרת MCP קיים (מהמדף) ולהשתמש בו מתוך Claude Code
+- להגדיר שרת MCP קיים (מהמדף) ולהשתמש בו מתוך Kiro CLI
 - לבנות שרת MCP משלכם מאפס עם TypeScript ו-MCP SDK
 - להבין את הארכיטקטורה: client/server, transports, tools, resources
-- לחבר שרת MCP מותאם אישית ל-Claude Code ולהשתמש בו בפועל
+- לחבר שרת MCP מותאם אישית ל-Kiro CLI ולהשתמש בו בפועל
 
-!!! tip "למה סשן נפרד?"
-    במודול 4 בנינו agent loop מאפס והבנו איך כלים עובדים. כאן נלמד את **הסטנדרט הפתוח** שמאפשר לכל אחד להרחיב את היכולות של כל agent — בלי לשנות את הקוד שלו.
+!!! tip "למה מודול נפרד?"
+    במודול 6 בנינו agent loop מאפס והבנו איך כלים עובדים. כאן נלמד את **הסטנדרט הפתוח** שמאפשר לכל אחד להרחיב את היכולות של כל agent — בלי לשנות את הקוד שלו.
 
 ## מה זה MCP?
 
 ### הבעיה
 
-כל agent צריך כלים. במודול 4 הגדרנו כלים ישירות בקוד: `read_file`, `write_file`, `run_command`. אבל מה אם רוצים להוסיף כלי שמתחבר ל-Jira? או ל-database? או ל-API פנימי?
+כל agent צריך כלים. במודול 6 הגדרנו כלים ישירות בקוד: `read_file`, `write_file`, `run_command`. אבל מה אם רוצים להוסיף כלי שמתחבר ל-Jira? או ל-database? או ל-API פנימי?
 
 בלי סטנדרט, כל שילוב דורש קוד ייעודי:
 
@@ -28,7 +28,7 @@
 
 ```mermaid
 graph LR
-    CC[Claude Code] -->|קוד ייעודי| J1[Jira]
+    CC[Kiro CLI] -->|קוד ייעודי| J1[Jira]
     CC -->|קוד ייעודי| G1[GitHub]
     CC -->|קוד ייעודי| D1[DB]
     CC -->|קוד ייעודי| S1[Slack]
@@ -46,7 +46,7 @@ MCP הוא **פרוטוקול פתוח** שיצרה Anthropic. הוא מגדיר
 
 ```mermaid
 graph LR
-    CC[Claude Code] <-->|MCP| JS[Jira Server]
+    CC[Kiro CLI] <-->|MCP| JS[Jira Server]
     CC <-->|MCP| GS[GitHub Server]
     CC <-->|MCP| DS[DB Server]
     CC <-->|MCP| SS[Slack Server]
@@ -63,7 +63,7 @@ graph LR
 ```mermaid
 graph TB
     subgraph Client
-        MC[MCP Client<br/>Claude Code / Cursor / etc.]
+        MC[MCP Client<br/>Kiro CLI / Cursor / etc.]
     end
     subgraph Server["MCP Server"]
         T[🔧 Tools]
@@ -109,30 +109,24 @@ graph TB
 
 ### שלב 1 — הבנת מבנה ההגדרות
 
-Claude Code מחפש הגדרות MCP בקובץ:
+Kiro (ה-IDE וה-CLI חולקים את אותן הגדרות) מחפש הגדרות MCP בקובץ גלובלי:
 
 ```
-~/.claude/claude_desktop_config.json
+~/.kiro/settings/mcp.json
 ```
 
 או ברמת הפרויקט:
 
 ```
-.claude/settings.json
+.kiro/settings/mcp.json
 ```
 
 !!! tip "הגדרה ברמת פרויקט"
-    אם רוצים ששרת MCP יהיה זמין רק בפרויקט מסוים, שימו את ההגדרה ב-`.claude/settings.json` בתוך תיקיית הפרויקט. זה שימושי כשכל פרויקט צריך כלים אחרים.
+    אם רוצים ששרת MCP יהיה זמין רק בפרויקט מסוים, שימו את ההגדרה ב-`.kiro/settings/mcp.json` בתוך תיקיית הפרויקט. הגדרות פרויקט גוברות על הגדרות גלובליות. זה שימושי כשכל פרויקט צריך כלים אחרים.
 
 ### שלב 2 — הוספת שרת filesystem
 
-הריצו ב-Claude Code:
-
-```
-/mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /home/$USER/allowed-folder
-```
-
-או לחלופין, ערכו ידנית את קובץ ההגדרות:
+צרו (או ערכו) את קובץ ההגדרות:
 
 ```json
 {
@@ -154,13 +148,19 @@ Claude Code מחפש הגדרות MCP בקובץ:
 
 ### שלב 3 — בדיקה
 
-הפעילו מחדש את Claude Code ובדקו שהשרת עובד:
+Kiro CLI טוען מחדש הגדרות MCP אוטומטית כשהקובץ נשמר (hot reload). בתוך הסשן, בדקו את סטטוס השרתים:
+
+```
+> /mcp
+```
+
+ואז ודאו שה-agent מכיר את הכלים:
 
 ```
 > "אילו כלי MCP זמינים לך?"
 ```
 
-Claude Code אמור לזהות את הכלים של שרת ה-filesystem:
+Kiro CLI אמור לזהות את הכלים של שרת ה-filesystem:
 
 - `read_file` — קריאת קובץ
 - `write_file` — כתיבת קובץ
@@ -218,7 +218,7 @@ Claude Code אמור לזהות את הכלים של שרת ה-filesystem:
 
 ```mermaid
 graph LR
-    CC["Claude Code<br/>(client)<br/><br/>תיצור פתק חדש"] <-->|stdio| NS["Notes MCP Server<br/><br/>🔧 create_note<br/>🔧 list_notes<br/>🔧 search_notes<br/>🔧 delete_note"]
+    CC["Kiro CLI<br/>(client)<br/><br/>תיצור פתק חדש"] <-->|stdio| NS["Notes MCP Server<br/><br/>🔧 create_note<br/>🔧 list_notes<br/>🔧 search_notes<br/>🔧 delete_note"]
     NS --> DB["📁 notes.json<br/>(local storage)"]
 ```
 
@@ -459,7 +459,7 @@ npx tsc
 
 ### שלב 4 — בדיקה ידנית (3 דקות)
 
-לפני שמחברים ל-Claude Code, בדקו שהשרת מתחיל:
+לפני שמחברים ל-Kiro CLI, בדקו שהשרת מתחיל:
 
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{},"clientInfo":{"name":"test","version":"1.0"},"protocolVersion":"2024-11-05"}}' | node dist/index.js
@@ -476,7 +476,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{},
 
 ### בדיקה עם MCP Inspector
 
-אפשר לבדוק את השרת **בלי Claude Code** באמצעות MCP Inspector — כלי ויזואלי לבדיקת שרתי MCP:
+אפשר לבדוק את השרת **בלי Kiro CLI** באמצעות MCP Inspector — כלי ויזואלי לבדיקת שרתי MCP:
 
 ```bash
 npx @modelcontextprotocol/inspector node dist/index.js
@@ -492,11 +492,11 @@ npx @modelcontextprotocol/inspector node dist/index.js
     - הריצו `node dist/index.js` ידנית ובדקו שאין שגיאות
     - וודאו ש-`tsconfig.json` מכוון ל-`"module": "Node16"`
 
-    **הכלים לא מופיעים ב-Claude Code:**
+    **הכלים לא מופיעים ב-Kiro CLI:**
 
-    - הפעילו מחדש את Claude Code (כל שינוי בהגדרות MCP דורש restart)
+    - הריצו `/mcp` בתוך הסשן לראות סטטוס שרתים ושגיאות טעינה
     - בדקו שהנתיב בקובץ ההגדרות הוא **absolute** (מלא), לא relative
-    - הריצו `/mcp` ב-Claude Code לראות סטטוס שרתים
+    - ההגדרות נטענות מחדש אוטומטית בשמירה — אם בכל זאת לא, פתחו סשן חדש
 
     **שגיאות JSON parse:**
 
@@ -508,17 +508,11 @@ npx @modelcontextprotocol/inspector node dist/index.js
     - בדקו הרשאות קריאה/כתיבה לתיקיית העבודה
     - ב-macOS: ייתכן שצריך לאשר גישה ל-terminal ב-System Preferences
 
-## תרגיל 3: חיבור השרת ל-Claude Code (20 דקות)
+## תרגיל 3: חיבור השרת ל-Kiro CLI (20 דקות)
 
 ### שלב 1 — הגדרת השרת
 
-הריצו ב-Claude Code:
-
-```
-/mcp add notes-server -- node /home/user/mcp-notes-server/dist/index.js
-```
-
-או ערכו את קובץ ההגדרות ידנית:
+ערכו את `.kiro/settings/mcp.json` (בפרויקט שבו תעבדו) והוסיפו את השרת:
 
 ```json
 {
@@ -534,15 +528,15 @@ npx @modelcontextprotocol/inspector node dist/index.js
 !!! warning "נתיב מלא"
     השתמשו בנתיב **מלא** (absolute path) לקובץ JS. נתיבים יחסיים עלולים לא לעבוד כי ה-working directory של השרת לא תמיד מה שמצפים.
 
-### שלב 2 — הפעלה מחדש ובדיקה
+### שלב 2 — בדיקה
 
-הפעילו מחדש את Claude Code ובדקו:
+ההגדרות נטענות אוטומטית בשמירה. בדקו עם `/mcp` שהשרת עלה, ואז:
 
 ```
 > "אילו כלי MCP חדשים יש לך?"
 ```
 
-Claude Code צריך לזהות ארבעה כלים: `create_note`, `list_notes`, `search_notes`, `delete_note`.
+Kiro CLI צריך לזהות ארבעה כלים: `create_note`, `list_notes`, `search_notes`, `delete_note`.
 
 ### שלב 3 — תרחיש שימוש מלא
 
@@ -569,7 +563,7 @@ Claude Code צריך לזהות ארבעה כלים: `create_note`, `list_notes`
 
 ### שלב 4 — שימוש מתקדם
 
-נסו לשלב את שרת ה-notes עם יכולות אחרות של Claude Code:
+נסו לשלב את שרת ה-notes עם יכולות אחרות של Kiro CLI:
 
 ```
 > "תקרא את הקובץ TODO.md בפרויקט, ותיצור פתק MCP עבור כל משימה פתוחה"

@@ -7,14 +7,14 @@
 
 בסוף המודול הזה, תוכלו:
 
-- להבין מה מייחד terminal agents (Kiro CLI, Claude Code) לעומת IDE agents
+- להבין מה מייחד terminal agents (Kiro CLI) לעומת IDE agents
 - לעבוד עם Kiro CLI כ-"עוזר מערכת" — לא רק עורך קוד
 - **לפתוח תיקייה ריקה ולבצע כל משימה** — לא חייבים פרויקט קוד קיים
 - למנף גישה מלאה למערכת ההפעלה למשימות שחורגות מעריכת קוד
 - להשתמש ב-terminal agents לאוטומציה של תחזוקה, DevOps, ותקשורת עם שרתים
 
-!!! tip "למה סשן נפרד?"
-    במודול 3 למדנו את העקרונות המשותפים לכל כלי ה-AI. כאן נתמקד ביתרון הייחודי של terminal agents: **הם לא רק עורכי קוד — הם agents עם גישה מלאה למחשב**.
+!!! tip "למה מודול נפרד?"
+    במודול 2 למדנו את העקרונות המשותפים לכל כלי ה-AI. כאן נתמקד ביתרון הייחודי של terminal agents: **הם לא רק עורכי קוד — הם agents עם גישה מלאה למחשב**.
 
 ## מה מייחד Terminal Agents?
 
@@ -27,7 +27,7 @@
 - Refactoring
 - כתיבת tests
 
-**Terminal agents** (Kiro CLI, Claude Code, Aider) חיים ב-terminal. הם עושים את כל מה שלמעלה, ובנוסף:
+**Terminal agents** (Kiro CLI, Aider) חיים ב-terminal. הם עושים את כל מה שלמעלה, ובנוסף:
 
 - **גישה מלאה ל-shell** — כל פקודה שאתם יכולים להריץ, הם יכולים להריץ
 - **לא צריכים פרויקט** — אפשר לפתוח תיקייה ריקה ולבצע כל משימה
@@ -41,15 +41,15 @@
 ### Kiro CLI — התקנה מהירה
 
 ```bash
-# התקנה גלובלית
-npm install -g @anthropic-ai/kiro-cli
+# התקנה (ב-Windows: הריצו בתוך Git Bash)
+curl -fsSL https://cli.kiro.dev/install | bash
 
 # הפעלה בתיקייה כלשהי
 cd ~/my-folder
-kiro
+kiro-cli
 ```
 
-Kiro CLI עובד כמו Claude Code — פותחים terminal, מריצים `kiro`, וכותבים מה שרוצים. הוא יכול לקרוא קבצים, לכתוב קבצים, להריץ פקודות, ולשאול שאלות.
+בהרצה הראשונה תתבקשו להתחבר עם חשבון Kiro. אחרי זה — פותחים terminal, מריצים `kiro-cli`, וכותבים מה שרוצים. הוא יכול לקרוא קבצים, לכתוב קבצים, להריץ פקודות, ולשאול שאלות.
 
 ### הארכיטקטורה
 
@@ -86,7 +86,7 @@ mkdir ~/missions/disk-cleanup
 cd ~/missions/disk-cleanup
 
 # הפעלת Kiro CLI
-kiro
+kiro-cli
 ```
 
 עכשיו אפשר לבקש **כל דבר** — לא חייב שיהיה קשור לקוד:
@@ -103,14 +103,14 @@ kiro
 **ניהול קבצים:**
 ```
 mkdir ~/missions/photo-organize && cd $_
-kiro
+kiro-cli
 > "יש לי 500 תמונות ב-~/Downloads/photos. תמיין אותן לתיקיות לפי שנה וחודש"
 ```
 
 **מחקר:**
 ```
 mkdir ~/missions/api-research && cd $_
-kiro
+kiro-cli
 > "תבדוק את ה-API של OpenWeatherMap, תראה לי דוגמה של response,
   ותכתוב לי סיכום של מה שהוא מציע"
 ```
@@ -118,7 +118,7 @@ kiro
 **תחזוקת מערכת:**
 ```
 mkdir ~/missions/server-health && cd $_
-kiro
+kiro-cli
 > "תתחבר לשרת production דרך SSH (user@server.example.com)
   ותייצר דוח על מצב השרת — CPU, RAM, דיסק, uptime"
 ```
@@ -126,7 +126,7 @@ kiro
 **עיבוד נתונים:**
 ```
 mkdir ~/missions/csv-transform && cd $_
-kiro
+kiro-cli
 > "יש לי קובץ CSV ב-~/data/sales.csv. תנתח אותו,
   תייצר גרף של מכירות לפי חודש, ותשמור כ-PNG"
 ```
@@ -331,11 +331,19 @@ Terminal agent יכול:
 !!! note "דפוס עבודה"
     בכל תרגיל — **צרו תיקיית משימה חדשה**, הפעילו את Kiro CLI, ובצעו את המשימה. ככה אתם מתרגלים את הדפוס של "תיקייה למשימה".
 
+!!! tip "עובדים ב-Windows?"
+    פקודות ה-bash בתרגילים (כמו `mkdir ~/missions/x && cd $_`) עובדות כמו שהן ב-**Git Bash**. אם אתם מעדיפים PowerShell:
+
+    ```powershell
+    mkdir ~\missions\disk-cleanup; cd ~\missions\disk-cleanup
+    kiro-cli
+    ```
+
 ### תרגיל 1: ניקוי וסריקה (20 דקות)
 
 ```bash
 mkdir ~/missions/disk-cleanup && cd $_
-kiro
+kiro-cli
 ```
 
 בקשו מ-Kiro CLI לבצע את המשימות הבאות:
@@ -348,10 +356,14 @@ kiro
 
 ```bash
 mkdir ~/missions/project-setup && cd $_
-kiro
+kiro-cli
 ```
 
-1. שכפלו פרויקט דוגמה (או קחו פרויקט קיים)
+1. שכפלו את פרויקט הדוגמה של הסדנה (או קחו פרויקט קיים):
+   ```bash
+   git clone https://github.com/tzvimg/ai-course-workshop.git
+   cd ai-course-workshop/examples/buggy-todo-api
+   ```
 2. בקשו מ-Kiro CLI: **"תתקין את כל מה שצריך כדי להריץ את הפרויקט הזה"**
 3. עקבו אחרי מה שהוא עושה — אילו פקודות הוא מריץ, באיזה סדר, ואיך הוא מטפל בשגיאות
 
@@ -359,7 +371,7 @@ kiro
 
 ```bash
 mkdir ~/missions/code-format && cd $_
-kiro
+kiro-cli
 ```
 
 1. בקשו מ-Kiro CLI להגדיר linter ו-formatter לפרויקט:
@@ -374,7 +386,7 @@ kiro
 
 ```bash
 mkdir ~/missions/debug && cd $_
-kiro
+kiro-cli
 ```
 
 בצעו אחת מהמשימות הבאות (לפי הסביבה שלכם):
@@ -461,14 +473,14 @@ Terminal agents מראים לכם **בדיוק** מה הם מריצים. קרא�
 !!! warning "Troubleshooting"
     **Kiro CLI לא מותקן / לא עובד:**
 
-    - וודאו שהתקנתם עם: `curl -fsSL https://cli.kiro.dev/install | bash`
+    - וודאו שהתקנתם עם: `curl -fsSL https://cli.kiro.dev/install | bash` (ב-Windows: בתוך Git Bash)
     - הפעילו terminal חדש אחרי ההתקנה (כדי שה-PATH יתעדכן)
-    - בדקו: `which kiro` — אמור להחזיר נתיב
-    - אם יש בעיות הרשאות: `chmod +x ~/.local/bin/kiro` (או הנתיב המתאים)
+    - בדקו: `which kiro-cli` — אמור להחזיר נתיב
+    - וודאו שהתחברתם לחשבון Kiro (ההתחברות מופיעה בהרצה הראשונה)
 
     **הרשאות נדחות (Permission Denied):**
 
-    - הוסיפו `--dangerously-skip-permissions` רק לסביבות sandbox
+    - הדגל `--trust-all-tools` מאשר את כל הפעולות אוטומטית — השתמשו בו **רק** בסביבות sandbox
     - ב-macOS: וודאו ש-terminal יש הרשאת "Full Disk Access" ב-System Preferences
     - ב-Linux: אם צריך sudo, עדיף להריץ את הפקודה ידנית מאשר לתת ל-agent sudo
 

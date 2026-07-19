@@ -13,7 +13,7 @@
 - לזהות מתי כדאי לפצל משימה ל-sub-agents ומתי לא
 
 !!! tip "למה sub-agents?"
-    במודול 4 בנינו agent בודד עם loop אחד. אבל מה קורה כשהמשימה מורכבת מדי? Agent אחד שמנסה לעשות הכל — חוקר, כותב קוד, בודק, מתקן — מתחיל לאבד פוקוס ולצרוך context מיותר. הפתרון: **לפצל את העבודה ל-agents מתמחים**.
+    במודול 6 בנינו agent בודד עם loop אחד. אבל מה קורה כשהמשימה מורכבת מדי? Agent אחד שמנסה לעשות הכל — חוקר, כותב קוד, בודק, מתקן — מתחיל לאבד פוקוס ולצרוך context מיותר. הפתרון: **לפצל את העבודה ל-agents מתמחים**.
 
 ## הרעיון: Agent שמפעיל agents
 
@@ -48,16 +48,18 @@ User → Main Agent (orchestrator)
 
 ה-tech lead לא כותב את כל הקוד בעצמו — הוא **מתזמר** את העבודה.
 
-## Sub-Agents ב-Kiro CLI
+## איך Sub-Agents עובדים בפועל
 
-### איך Kiro CLI משתמש ב-sub-agents
+### העיקרון
 
-כש-Kiro CLI מקבל משימה מורכבת, הוא יכול להפעיל sub-agents דרך ה-**Task tool**. כל sub-agent:
+Sub-agent הוא פשוט **הפעלה נפרדת של agent** — עם prompt משלו, context נקי, וסט כלים מוגבל. כל sub-agent:
 
 - מקבל **prompt ספציפי** — מה בדיוק לעשות
 - רץ עם **context נקי** — לא רואה את כל היסטוריית השיחה
-- מקבל **סט כלים מוגבל** — לפי סוג ה-agent
-- מחזיר **תוצאה אחת** — ל-agent הראשי
+- מקבל **סט כלים מוגבל** — לפי התפקיד שלו
+- מחזיר **תוצאה אחת** — ל-agent הראשי (ה-orchestrator)
+
+במודול הזה נממש את זה בעצמנו: נבנה orchestrator ב-TypeScript שמריץ sub-agents מעל ה-Anthropic SDK — הרחבה ישירה של ה-agent שבנינו במודול 6. (ההקבלה ב-Kiro CLI: ה-custom agents ממודול 9, כל אחד עם `tools` ו-`allowedTools` משלו, שאפשר להריץ בסשנים מקבילים.)
 
 ```mermaid
 graph TD
@@ -73,26 +75,26 @@ graph TD
 
 ### סוגי sub-agents
 
-ב-Kiro CLI יש כמה סוגי agents מובנים, כל אחד עם כלים שונים:
+שלושה תפקידים שכדאי להגדיר כמעט בכל orchestrator, כל אחד עם כלים שונים:
 
-**Explore Agent** — חקירת codebase:
+**Explorer** — חקירת codebase:
 
-- כלים: קריאת קבצים, חיפוש (Glob, Grep), ניווט
+- כלים: קריאת קבצים, חיפוש (list, search), ניווט
 - **אין לו**: כתיבה, הרצת פקודות
 - שימוש: "תמצא איפה מוגדר ה-authentication middleware"
 
-**Coder Agent** — כתיבת קוד:
+**Coder** — כתיבת קוד:
 
 - כלים: קריאה, כתיבה, חיפוש, הרצת פקודות
 - שימוש: "תוסיף validation לכל ה-API endpoints"
 
-**Plan Agent** — תכנון:
+**Planner** — תכנון:
 
 - כלים: קריאה, חיפוש
 - **אין לו**: כתיבה, הרצת פקודות
 - שימוש: "תתכנן את הארכיטקטורה למערכת notifications"
 
-> כל סוג agent מקבל רק את הכלים שהוא צריך — **עקרון ה-least privilege**. Explorer לא יכול לשנות קבצים, Planner לא יכול להריץ פקודות.
+> כל סוג agent מקבל רק את הכלים שהוא צריך — **עקרון ה-least privilege**. Explorer לא יכול לשנות קבצים, Planner לא יכול להריץ פקודות. זה בדיוק אותו רעיון כמו `tools`/`allowedTools` ב-custom agents של Kiro CLI (מודול 9).
 
 ## הגדרת Sub-Agent
 
@@ -165,28 +167,28 @@ Task: "קרא את הקובץ src/auth/middleware.ts
 **Explore Agent:**
 
 - קריאת קבצים — כן
-- חיפוש (Glob/Grep) — כן
+- חיפוש (search) — כן
 - כתיבת קבצים — לא
 - הרצת פקודות — לא
 
 **Plan Agent:**
 
 - קריאת קבצים — כן
-- חיפוש (Glob/Grep) — כן
+- חיפוש (search) — כן
 - כתיבת קבצים — לא
 - הרצת פקודות — לא
 
 **Coder Agent:**
 
 - קריאת קבצים — כן
-- חיפוש (Glob/Grep) — כן
+- חיפוש (search) — כן
 - כתיבת קבצים — כן
 - הרצת פקודות — כן
 
 **General-purpose Agent:**
 
 - קריאת קבצים — כן
-- חיפוש (Glob/Grep) — כן
+- חיפוש (search) — כן
 - כתיבת קבצים — כן
 - הרצת פקודות — כן
 - הפעלת sub-agents — כן
@@ -241,7 +243,7 @@ const [vulnerabilities, injectionRisks, secretLeaks] = await Promise.all([
      Check for known CVEs using the lock file versions.
      List every dependency with a known vulnerability,
      its severity (critical/high/medium/low), and recommended fix.`,
-    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 10 }
+    { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 10 }
   ),
   runSubAgent(
     `Search the entire codebase for code injection risks:
@@ -249,7 +251,7 @@ const [vulnerabilities, injectionRisks, secretLeaks] = await Promise.all([
      - XSS: unescaped user input rendered in HTML/templates
      - Command injection: shell commands built from user input
      For each finding, show the file, line, and suggested fix.`,
-    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 12 }
+    { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 12 }
   ),
   runSubAgent(
     `Search for secrets and credentials leaked in the codebase:
@@ -258,7 +260,7 @@ const [vulnerabilities, injectionRisks, secretLeaks] = await Promise.all([
      - Hardcoded connection strings
      - Private keys or certificates
      Check .gitignore to see if sensitive files are properly excluded.`,
-    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 10 }
+    { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 10 }
   ),
 ]);
 
@@ -276,7 +278,7 @@ const report = await runSubAgent(
    ${secretLeaks}
 
    Prioritize by severity. Group related issues together.`,
-  { allowedTools: ["Read"], maxTurns: 5 }
+  { allowedTools: ["read_file"], maxTurns: 5 }
 );
 ```
 
@@ -388,7 +390,7 @@ async function supervisedMigration(directories: string[]) {
          Return a JSON summary:
          { "convertedFiles": [...], "newTypes": [...], "errors": [...] }`,
         {
-          allowedTools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
+          allowedTools: ["read_file", "write_file", "list_files", "search_files", "run_command"],
           maxTurns: 20,
         }
       );
@@ -405,7 +407,7 @@ async function supervisedMigration(directories: string[]) {
 
          Return: { "valid": true/false, "issues": [...] }`,
         {
-          allowedTools: ["Read", "Glob", "Grep", "Bash"],
+          allowedTools: ["read_file", "list_files", "search_files", "run_command"],
           maxTurns: 10,
         }
       );
@@ -466,7 +468,7 @@ const validation = await runSubAgent(
 
    If there are issues, list each one with the file and line number.`,
   {
-    allowedTools: ["Read", "Glob", "Grep", "Bash"],
+    allowedTools: ["read_file", "list_files", "search_files", "run_command"],
     maxTurns: 15,
   }
 );
@@ -509,7 +511,7 @@ Agent שנתקע ב-loop אינסופי יכול לצרוך tokens ללא הגב
 // הגנה כפולה: maxTurns ברמת ה-agent + timeout ברמת הקוד
 async function runSubAgentSafely(
   prompt: string,
-  options: Partial<ClaudeCodeOptions>
+  options: Partial<SubAgentOptions>
 ) {
   return Promise.race([
     runSubAgent(prompt, {
@@ -542,13 +544,16 @@ Agent עם הרשאות כתיבה יכול ליצור מספר גדול של ק
 ב-multi-agent, העלויות יכולות לצמוח מהר. אם orchestrator מפעיל 5 agents שכל אחד מפעיל 3 sub-agents — זה 15 sessions של API calls:
 
 ```typescript
-// מעקב אחר צריכת tokens כוללת
+// מעקב אחר צריכת tokens כוללת — הוסיפו ל-runSubAgent
 let totalTokensUsed = 0;
 const TOKEN_BUDGET = 500_000; // תקציב מקסימלי
 
+// בתוך הלולאה של runSubAgent, אחרי כל קריאה ל-client.messages.create:
+//   totalTokensUsed += response.usage.input_tokens + response.usage.output_tokens;
+
 async function runSubAgentWithBudget(
   prompt: string,
-  options: Partial<ClaudeCodeOptions>
+  options: Partial<SubAgentOptions>
 ): Promise<string> {
   if (totalTokensUsed >= TOKEN_BUDGET) {
     throw new Error(
@@ -556,15 +561,7 @@ async function runSubAgentWithBudget(
     );
   }
 
-  let result = "";
-  for await (const message of query({ prompt, ...options })) {
-    if (message.type === "result") {
-      result = message.result;
-    }
-    if (message.type === "usage") {
-      totalTokensUsed += message.inputTokens + message.outputTokens;
-    }
-  }
+  const result = await runSubAgent(prompt, options);
 
   console.log(
     `Token usage: ${totalTokensUsed}/${TOKEN_BUDGET} ` +
@@ -582,7 +579,7 @@ async function runSubAgentWithBudget(
 ```typescript
 // Pipeline עם validation בין שלבים
 const exploration = await runSubAgent("Explore the auth system...", {
-  allowedTools: ["Read", "Glob", "Grep"],
+  allowedTools: ["read_file", "list_files", "search_files"],
   maxTurns: 10,
 });
 
@@ -601,7 +598,7 @@ if (!exploration.includes("src/") && !exploration.includes("file")) {
 // רק אם ה-validation עבר — ממשיכים לשלב הבא
 const plan = await runSubAgent(
   `Based on this analysis: ${exploration}\n\nCreate a plan...`,
-  { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 10 }
+  { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 10 }
 );
 ```
 
@@ -634,7 +631,7 @@ const plan = await runSubAgent(
 ```typescript
 async function runSubAgentSafe(
   prompt: string,
-  options?: Partial<ClaudeCodeOptions>,
+  options?: Partial<SubAgentOptions>,
   retries = 2
 ): Promise<{ success: boolean; result: string; error?: string }> {
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -671,15 +668,15 @@ async function runSubAgentSafe(
 async function parallelExploreWithFallback(task: string) {
   const results = await Promise.allSettled([
     runSubAgentSafe("Analyze project structure", {
-      allowedTools: ["Read", "Glob", "Grep"],
+      allowedTools: ["read_file", "list_files", "search_files"],
       maxTurns: 8,
     }),
     runSubAgentSafe("Analyze dependencies", {
-      allowedTools: ["Read", "Glob", "Grep"],
+      allowedTools: ["read_file", "list_files", "search_files"],
       maxTurns: 8,
     }),
     runSubAgentSafe("Find code patterns", {
-      allowedTools: ["Read", "Glob", "Grep"],
+      allowedTools: ["read_file", "list_files", "search_files"],
       maxTurns: 8,
     }),
   ]);
@@ -747,52 +744,64 @@ async function parallelExploreWithFallback(task: string) {
 !!! tip "טיפ לחיסכון"
     התחילו תמיד עם agent בודד. רק אם הוא נכשל, מייצר תוצאה חלקית, או שה-context מתמלא — עברו ל-multi-agent. אל תתחילו עם orchestrator מורכב למשימה שאפשר לפתור ב-prompt אחד.
 
-## תרגיל מעשי 1: חקירה מקבילית (30 דקות)
+## תרגיל מעשי 1: חקירה מקבילית — אתם ה-Orchestrator (30 דקות)
 
 ### התרחיש
 
-ניקח פרויקט ונבקש מ-Kiro CLI לבצע **חקירה מקבילית** של חלקים שונים.
+לפני שנבנה orchestrator בקוד, נרגיש את הדפוס על הידיים: **אתם** תהיו ה-orchestrator, ושלושה סשנים מקביליים של Kiro CLI יהיו ה-sub-agents.
 
-### שלב 1 — שכפול פרויקט לדוגמה
+### שלב 1 — שכפול פרויקט והגדרת Explorer agent
 
 ```bash
 git clone https://github.com/expressjs/express.git ~/missions/subagent-lab
 cd ~/missions/subagent-lab
-kiro
+mkdir -p .kiro/agents
 ```
 
-### שלב 2 — בקשה שמעודדת שימוש ב-sub-agents
+צרו `.kiro/agents/explorer.json` — agent חקירה read-only (כמו שלמדנו במודול 9):
+
+```json
+{
+  "name": "explorer",
+  "description": "Read-only codebase explorer. Returns focused, structured summaries.",
+  "prompt": "You are a codebase exploration agent. Answer the user's question about the codebase by reading and searching files. You must NOT modify anything. Return a concise, structured summary: relevant files, key findings, and open questions.",
+  "tools": ["read"],
+  "allowedTools": ["read"]
+}
+```
+
+### שלב 2 — Fan-Out: שלושה sub-agents במקביל
+
+פתחו **שלושה terminals**, בכל אחד הריצו `kiro-cli --agent explorer` באותה תיקייה, ותנו לכל אחד שאלה אחרת:
+
+- Terminal 1: "מה המבנה הכללי של התיקיות ומהם הקבצים החשובים?"
+- Terminal 2: "מהם ה-dependencies העיקריים ומה כל אחד עושה?"
+- Terminal 3: "איך מערכת ה-routing עובדת? עקוב אחרי הקוד מה-entry point"
+
+### שלב 3 — Fan-In: מיזוג התוצאות
+
+פתחו סשן רביעי (רגיל, בלי `--agent`) והדביקו את שלושת הסיכומים:
 
 ```
-"אני רוצה להבין את הפרויקט הזה לעומק.
-בדוק במקביל:
-1. מה המבנה הכללי של התיקיות והקבצים החשובים
-2. מהם ה-dependencies העיקריים ומה כל אחד עושה
-3. איך מערכת ה-routing עובדת — עקוב אחרי הקוד מ-entry point
-
-תן לי סיכום מאורגן של כל הממצאים."
+"הנה שלושה דוחות חקירה על הפרויקט: [הדביקו]
+תמזג אותם לסקירה מאורגנת אחת של הפרויקט."
 ```
-
-### שלב 3 — צפו ב-sub-agents בפעולה
 
 שימו לב:
 
-- האם Kiro CLI הפעיל sub-agents?
-- מה סוג ה-agents שהוא בחר?
-- האם הם רצו במקביל או בסדרה?
-- איך הוא שילב את התוצאות?
-
-!!! tip "מתי Kiro CLI מפעיל sub-agents?"
-    Kiro CLI מפעיל sub-agents כשהוא מזהה שהמשימה מורכבת מספיק או כשמבקשים ממנו מפורשות לבצע דברים במקביל. לפעמים הוא יבחר לעבוד לבד — זה חלק מההחלטה של ה-orchestrator.
+- כמה מהר שלוש חקירות מקביליות הסתיימו לעומת אחת סדרתית?
+- האם ה-explorer ניסה לחרוג מההרשאות שלו?
+- כמה עבודה ידנית הייתה בהעברת התוצאות בין הסשנים? **בדיוק את זה נאטמט בתרגיל 2.**
 
 ## תרגיל מעשי 2: בניית Orchestrator (55 דקות)
 
 ### המטרה
 
-נבנה orchestrator פשוט שמתזמר שני sub-agents באמצעות ה-Claude Agent SDK.
+נבנה orchestrator שמתזמר sub-agents — **הרחבה ישירה של ה-agent שבנינו במודול 6**. הפונקציה המרכזית, `runSubAgent`, היא בדיוק אותו agent loop, רק עטוף כך שאפשר להריץ אותו כמה פעמים עם prompts, כלים ומגבלות שונים.
 
-!!! info "לגבי `@anthropic-ai/claude-code-sdk`"
-    ה-SDK זמין באופן פומבי ב-npm ואפשר להתקין אותו עם `npm install @anthropic-ai/claude-code-sdk`. הוא מאפשר להפעיל Claude Code כ-sub-process מתוך קוד TypeScript/JavaScript. נדרש שיהיה Claude Code CLI מותקן על המכונה (`npm install -g @anthropic-ai/claude-code`).
+!!! info "מה צריך"
+    - `ANTHROPIC_API_KEY` מוגדר (כמו במודול 6)
+    - `npm install @anthropic-ai/sdk` ו-`npm install -D tsx typescript @types/node`
 
 ### שלב 1 — שלד הקוד
 
@@ -800,45 +809,185 @@ kiro
 
 ```bash
 mkdir ~/missions/orchestrator && cd $_
-kiro
+kiro-cli
 ```
 
 בקשו מ-Kiro CLI:
 
 ```
-"צור פרויקט TypeScript עם הקובץ orchestrator.ts.
-הפרויקט צריך להשתמש ב-@anthropic-ai/claude-code-sdk.
-התקן את ה-dependencies."
+"צור פרויקט TypeScript עם קובץ orchestrator.ts ריק.
+התקן את @anthropic-ai/sdk, tsx, typescript ו-@types/node."
 ```
 
-### שלב 2 — מימוש orchestrator
+### שלב 2 — מימוש runSubAgent
 
-הנה השלד שנעבוד איתו:
+הנה הלב של ה-orchestrator — agent loop כמו במודול 6, עם שני שינויים: הכלים מסוננים לפי `allowedTools`, ויש תקרת `maxTurns`:
 
 ```typescript
-import { query, type ClaudeCodeOptions } from "@anthropic-ai/claude-code-sdk";
+import Anthropic from "@anthropic-ai/sdk";
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
 
-// הגדרת sub-agent
+const client = new Anthropic();
+
+// ===== ארגז הכלים המלא (כמו במודול 6, עם שני כלים נוספים) =====
+
+const ALL_TOOLS: Record<string, Anthropic.Tool> = {
+  read_file: {
+    name: "read_file",
+    description: "Read the contents of a file",
+    input_schema: {
+      type: "object" as const,
+      properties: { path: { type: "string" } },
+      required: ["path"],
+    },
+  },
+  list_files: {
+    name: "list_files",
+    description: "List files in a directory (recursively, up to 200 entries)",
+    input_schema: {
+      type: "object" as const,
+      properties: { path: { type: "string", description: "Directory path, default: current dir" } },
+      required: [],
+    },
+  },
+  search_files: {
+    name: "search_files",
+    description: "Search for a text pattern in files under a directory",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        pattern: { type: "string" },
+        path: { type: "string", description: "Directory to search, default: current dir" },
+      },
+      required: ["pattern"],
+    },
+  },
+  write_file: {
+    name: "write_file",
+    description: "Write content to a file (creates it if missing)",
+    input_schema: {
+      type: "object" as const,
+      properties: { path: { type: "string" }, content: { type: "string" } },
+      required: ["path", "content"],
+    },
+  },
+  run_command: {
+    name: "run_command",
+    description: "Run a shell command and return its output",
+    input_schema: {
+      type: "object" as const,
+      properties: { command: { type: "string" } },
+      required: ["command"],
+    },
+  },
+};
+
+// עזר: רשימת קבצים רקורסיבית (בלי node_modules/.git)
+function listFilesRecursive(dir: string, acc: string[] = []): string[] {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (acc.length >= 200) break;
+    if (entry.name === "node_modules" || entry.name === ".git") continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) listFilesRecursive(full, acc);
+    else acc.push(full);
+  }
+  return acc;
+}
+
+// עזר: חיפוש טקסט בקבצים (cross-platform, בלי תלות ב-grep)
+function searchInFiles(pattern: string, dir: string): string {
+  const matches: string[] = [];
+  for (const file of listFilesRecursive(dir)) {
+    let content: string;
+    try { content = fs.readFileSync(file, "utf-8"); } catch { continue; }
+    content.split("\n").forEach((line, i) => {
+      if (line.includes(pattern) && matches.length < 100) {
+        matches.push(`${file}:${i + 1}: ${line.trim()}`);
+      }
+    });
+  }
+  return matches.length ? matches.join("\n") : "No matches found";
+}
+
+function executeTool(name: string, input: any): string {
+  switch (name) {
+    case "read_file":
+      return fs.readFileSync(input.path, "utf-8");
+    case "list_files":
+      return listFilesRecursive(input.path ?? ".").join("\n");
+    case "search_files":
+      return searchInFiles(input.pattern, input.path ?? ".");
+    case "write_file":
+      fs.writeFileSync(input.path, input.content);
+      return `File written to ${input.path}`;
+    case "run_command":
+      try {
+        return execSync(input.command, { encoding: "utf-8", timeout: 30000 });
+      } catch (error: any) {
+        return `Command failed: ${error.message}\n${error.stderr ?? ""}`;
+      }
+    default:
+      return `Unknown tool: ${name}`;
+  }
+}
+
+// ===== runSubAgent — agent loop עם כלים מסוננים ותקרת turns =====
+
+interface SubAgentOptions {
+  allowedTools: string[];
+  maxTurns: number;
+}
+
 async function runSubAgent(
   prompt: string,
-  options?: Partial<ClaudeCodeOptions>
+  options?: Partial<SubAgentOptions>
 ): Promise<string> {
-  const defaultOptions: ClaudeCodeOptions = {
-    prompt,
-    allowedTools: ["Read", "Glob", "Grep"],  // read-only by default
+  const { allowedTools, maxTurns }: SubAgentOptions = {
+    allowedTools: ["read_file", "list_files", "search_files"], // read-only by default
     maxTurns: 10,
+    ...options,
   };
 
-  const mergedOptions = { ...defaultOptions, ...options };
-  let result = "";
+  // ה-sub-agent מקבל רק את הכלים שהותרו לו — least privilege
+  const tools = allowedTools.map((name) => ALL_TOOLS[name]);
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: prompt }];
 
-  for await (const message of query(mergedOptions)) {
-    if (message.type === "result") {
-      result = message.result;
+  for (let turn = 0; turn < maxTurns; turn++) {
+    const response = await client.messages.create({
+      model: "claude-sonnet-5",
+      max_tokens: 4096,
+      tools,
+      messages,
+    });
+    messages.push({ role: "assistant", content: response.content });
+
+    if (response.stop_reason !== "tool_use") {
+      // ה-agent סיים — מחזירים את הטקסט הסופי
+      return response.content
+        .filter((b) => b.type === "text")
+        .map((b) => (b as Anthropic.TextBlock).text)
+        .join("\n");
     }
+
+    const toolResults: Anthropic.ToolResultBlockParam[] = response.content
+      .filter((b) => b.type === "tool_use")
+      .map((block: any) => {
+        console.log(`  🔧 ${block.name}(${JSON.stringify(block.input).slice(0, 80)})`);
+        let result: string;
+        try {
+          result = executeTool(block.name, block.input);
+        } catch (error: any) {
+          result = `Error: ${error.message}`;
+        }
+        return { type: "tool_result", tool_use_id: block.id, content: result };
+      });
+
+    messages.push({ role: "user", content: toolResults });
   }
 
-  return result;
+  return "[maxTurns reached — partial result] The agent ran out of turns before finishing.";
 }
 
 // ה-orchestrator
@@ -852,7 +1001,7 @@ async function orchestrate(task: string) {
      Focus on understanding the structure, key files, and patterns.
      Return a concise summary.`,
     {
-      allowedTools: ["Read", "Glob", "Grep"],  // read-only
+      allowedTools: ["read_file", "list_files", "search_files"],  // read-only
       maxTurns: 15,
     }
   );
@@ -872,7 +1021,7 @@ async function orchestrate(task: string) {
      - Order of operations
      - Potential risks`,
     {
-      allowedTools: ["Read", "Glob", "Grep"],  // still read-only
+      allowedTools: ["read_file", "list_files", "search_files"],  // still read-only
       maxTurns: 10,
     }
   );
@@ -886,7 +1035,7 @@ async function orchestrate(task: string) {
 
      Write the code changes. Follow existing code style.`,
     {
-      allowedTools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
+      allowedTools: ["read_file", "write_file", "list_files", "search_files", "run_command"],
       maxTurns: 20,
     }
   );
@@ -907,10 +1056,10 @@ orchestrate(task);
 
 ```typescript
 // Phase 1 & 2: read-only — בטוח לחלוטין
-allowedTools: ["Read", "Glob", "Grep"]
+allowedTools: ["read_file", "list_files", "search_files"]
 
 // Phase 3: full access — רק כאן צריך כתיבה
-allowedTools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
+allowedTools: ["read_file", "write_file", "list_files", "search_files", "run_command"]
 ```
 
 !!! warning "למה זה חשוב?"
@@ -927,15 +1076,15 @@ console.log("🔍 Phase 1: Parallel exploration...");
 const [structure, dependencies, patterns] = await Promise.all([
   runSubAgent(
     "Map the directory structure. What are the key directories and entry points?",
-    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 8 }
+    { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 8 }
   ),
   runSubAgent(
     "Analyze package.json / requirements.txt. What are the main dependencies and what does each do?",
-    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 8 }
+    { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 8 }
   ),
   runSubAgent(
     "Find the main code patterns: how is error handling done? Authentication? Database access?",
-    { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 8 }
+    { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 8 }
   ),
 ]);
 
@@ -955,7 +1104,7 @@ const plan = await runSubAgent(
    ${patterns}
 
    Create an implementation plan for: ${task}`,
-  { allowedTools: ["Read", "Glob", "Grep"], maxTurns: 10 }
+  { allowedTools: ["read_file", "list_files", "search_files"], maxTurns: 10 }
 );
 ```
 
@@ -977,20 +1126,20 @@ npx tsx orchestrator.ts "Add error handling middleware"
 
 ```typescript
 // agent שיכול רק לחפש — אפילו לא לקרוא קבצים שלמים
-const searchOnly: ClaudeCodeOptions = {
-  allowedTools: ["Glob", "Grep"],
+const searchOnly: SubAgentOptions = {
+  allowedTools: ["list_files", "search_files"],
   maxTurns: 5,
 };
 
 // agent שיכול לקרוא ולכתוב אבל לא להריץ פקודות
-const readWrite: ClaudeCodeOptions = {
-  allowedTools: ["Read", "Write", "Edit", "Glob", "Grep"],
+const readWrite: SubAgentOptions = {
+  allowedTools: ["read_file", "write_file", "list_files", "search_files"],
   maxTurns: 15,
 };
 
 // agent עם גישה מלאה — כולל הרצת shell commands
-const fullAccess: ClaudeCodeOptions = {
-  allowedTools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
+const fullAccess: SubAgentOptions = {
+  allowedTools: ["read_file", "write_file", "list_files", "search_files", "run_command"],
   maxTurns: 25,
 };
 ```
@@ -998,13 +1147,11 @@ const fullAccess: ClaudeCodeOptions = {
 ### הגבלת iterations
 
 ```typescript
-const cautious: ClaudeCodeOptions = {
-  prompt: "...",
+const cautious: Partial<SubAgentOptions> = {
   maxTurns: 5,   // מקסימום 5 סיבובים — למשימות קצרות
 };
 
-const thorough: ClaudeCodeOptions = {
-  prompt: "...",
+const thorough: Partial<SubAgentOptions> = {
   maxTurns: 30,  // יותר סיבובים — למשימות מורכבות
 };
 ```
@@ -1015,9 +1162,8 @@ Sub-agent מקבל **רק** את ה-prompt שנשלח אליו. הוא **לא ר
 
 **מה כן מועבר:**
 
-- ה-prompt המלא שהוגדר ב-`options.prompt`
-- קבצי rules של הפרויקט (נטענים אוטומטית אם קיימים בתיקיית העבודה)
-- הגדרות MCP servers (אם מוגדרים)
+- ה-prompt המלא שנשלח ל-`runSubAgent` — וזה הכל
+- (בכלים מסחריים כמו Kiro CLI, sub-agent מקבל אוטומטית גם את קבצי ה-steering של הפרויקט והגדרות ה-MCP — ב-orchestrator שלנו, אם רוצים את זה, צריך לכלול את התוכן ב-prompt)
 
 **מה לא מועבר:**
 
@@ -1041,7 +1187,7 @@ const contextAware = await runSubAgent(
    ${explorationResult}
 
    Now do: analyze the authentication system`,
-  { allowedTools: ["Read", "Glob", "Grep"] }
+  { allowedTools: ["read_file", "list_files", "search_files"] }
 );
 ```
 
@@ -1071,7 +1217,7 @@ const contextAware = await runSubAgent(
     **Sub-agent לא מתנהג כמצופה:**
 
     - בדקו שה-prompt מספיק ספציפי — sub-agent לא רואה את ההקשר של השיחה הראשית
-    - וודאו שקבצי ה-rules של הפרויקט קיימים ונטענים — הם המקור העיקרי ל-conventions
+    - conventions של הפרויקט לא נטענים אוטומטית ב-orchestrator שלנו — כללו אותם ב-prompt של ה-sub-agent
     - נסו להריץ את ה-prompt של ה-sub-agent ישירות (לא דרך orchestrator) כדי לראות את ההתנהגות
 
     **Infinite loops — agent שלא מסיים:**
@@ -1079,7 +1225,7 @@ const contextAware = await runSubAgent(
     - הגדירו תמיד `maxTurns` — בלי זה, agent יכול לרוץ ללא הגבלה
     - הוסיפו timeout ברמת הקוד: `Promise.race([runSubAgent(...), timeout(60000)])`
     - אם agent חוזר על אותה פעולה — כנראה ה-prompt לא ברור מספיק לגבי תנאי העצירה
-    - שימו לב: `maxTurns: 5` אומר 5 tool calls. אם המשימה דורשת 3 קריאות קבצים + כתיבה + הרצה — זה כבר 5
+    - שימו לב: `maxTurns: 5` אומר 5 סבבי API. משימה שדורשת לקרוא כמה קבצים, לכתוב, ולהריץ בדיקות — יכולה בקלות לצרוך את כולם
 
     **Context לא מועבר בין agents:**
 
@@ -1093,7 +1239,7 @@ const contextAware = await runSubAgent(
     - הוסיפו logging לכל שלב: `console.log("Agent prompt:", prompt.substring(0, 200))`
     - הריצו כל sub-agent בנפרד לפני שמחברים את ה-orchestrator
     - השתמשו ב-`maxTurns` נמוך בפיתוח (3-5) כדי לחסוך עלויות וזמן
-    - בדקו את ה-`message.type` בלופ — יש גם `"tool_use"` ו-`"text"` שיכולים לעזור ב-debug
+    - `runSubAgent` כבר מדפיס כל tool call — עקבו אחרי הפלט כדי לראות מה ה-agent באמת עושה
 
 ## שאלות לדיון
 
@@ -1111,4 +1257,4 @@ const contextAware = await runSubAgent(
 - **דפוסי תזמור**: Fan-out (מקבילי), Pipeline (סדרתי), Supervisor (עם פיקוח)
 - **מקביליות** עם `Promise.all` חוסכת זמן כשהמשימות עצמאיות
 - **אל תסבכו** — agent בודד שעובד טוב עדיף על מערכת multi-agent מיותרת
-- ה-Claude Agent SDK (`@anthropic-ai/claude-code-sdk`) מאפשר לבנות orchestrators מותאמים אישית
+- orchestrator הוא לא קסם — בנינו אחד שלם עם ה-Anthropic SDK, כהרחבה של ה-agent loop ממודול 6

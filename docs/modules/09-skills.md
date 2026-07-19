@@ -1,4 +1,4 @@
-# מודול 9: Skills — אוטומציה של תהליכי עבודה
+# מודול 9: Custom Agents — אוטומציה של תהליכי עבודה
 
 !!! info "משך"
     25 דקות הרצאה + 60 דקות hands-on + 15 דקות דיון
@@ -7,553 +7,342 @@
 
 בסוף המודול הזה, תוכלו:
 
-- להבין מה הם Skills ב-Claude Code ואיך הם שונים מ-CLAUDE.md
-- ליצור custom slash commands שמאטמטים תהליכי עבודה חוזרים
-- להתקין ולהשתמש ב-skills מוכנים מהקהילה
-- לבנות skills מתקדמים עם multi-step workflows ו-placeholders
+- להבין מה הם Custom Agents ב-Kiro CLI ואיך הם שונים מקבצי steering
+- ליצור agents מותאמים אישית שמאטמטים תהליכי עבודה חוזרים
+- להגביל agent לכלים ספציפיים (least privilege) ולתת לו הוראות קבועות
+- לשתף agents עם הצוות דרך Git
 
-!!! tip "למה Skills?"
-    כולנו עושים פעולות חוזרות: יצירת PR, כתיבת migration, scaffold של component. במקום להסביר לـ-Claude Code מה לעשות כל פעם מחדש — אפשר לכתוב את ההוראות פעם אחת כ-skill ולהפעיל אותו בפקודה אחת.
+!!! tip "למה Custom Agents?"
+    כולנו עושים פעולות חוזרות: code review לפני PR, בדיקת מוכנות ל-deploy, כתיבת migration. במקום להסביר ל-agent מה לעשות כל פעם מחדש — אפשר לכתוב את ההוראות פעם אחת כ-custom agent ולהפעיל אותו בפקודה אחת.
 
-## מה הם Skills?
+## מה הם Custom Agents?
 
-Skills הם **פקודות slash מותאמות אישית** שמוסיפים ל-Claude Code. כל skill הוא קובץ Markdown שמכיל הוראות — כשמפעילים את הפקודה, ההוראות נטענות כ-prompt ו-Claude Code פועל לפיהן.
+Custom Agent הוא **תצורה שמורה של agent**: הוראות קבועות (system prompt), סט כלים מוגדר, והרשאות — הכל בקובץ JSON אחד. כשמפעילים את ה-agent, Kiro CLI טוען את התצורה וה-agent מתנהג בדיוק לפי מה שהגדרתם.
 
 ### הרעיון הבסיסי
 
 ```mermaid
 graph LR
-    MD["📄 קובץ Markdown<br/>עם הוראות"] --> SC["⌨️ פקודת slash<br/>/command"] --> CC["🤖 Claude Code<br/>מבצע"]
+    JSON["📄 קובץ JSON<br/>הוראות + כלים + הרשאות"] --> AG["⌨️ kiro-cli --agent<br/>my-agent"] --> CC["🤖 Agent ממוקד<br/>מבצע"]
 ```
 
 לדוגמה:
 
-- הקובץ `pr-review.md` → הפקודה `/pr-review`
-- הקובץ `commit.md` → הפקודה `/commit`
-- הקובץ `deploy-check.md` → הפקודה `/deploy-check`
+- הקובץ `pr-reviewer.json` → `kiro-cli --agent pr-reviewer`
+- הקובץ `deploy-checker.json` → `kiro-cli --agent deploy-checker`
+- הקובץ `db-migrator.json` → `kiro-cli --agent db-migrator`
 
-### איפה שמים Skills?
+### איפה שמים Custom Agents?
 
 יש שתי רמות:
 
-**ברמת הפרויקט** — skills ספציפיים לפרויקט (נשמרים ב-Git):
+**ברמת הפרויקט** — agents ספציפיים לפרויקט (נשמרים ב-Git):
 ```
-.claude/skills/
-├── pr-review.md
-├── commit.md
-└── component.md
-```
-
-**ברמה גלובלית** — skills שזמינים בכל פרויקט:
-```
-~/.claude/skills/
-├── commit.md
-├── explain.md
-└── test.md
+.kiro/agents/
+├── pr-reviewer.json
+├── deploy-checker.json
+└── db-migrator.json
 ```
 
-!!! note "סדר עדיפות"
-    אם יש skill עם אותו שם גם בפרויקט וגם גלובלית — הגרסה של הפרויקט מנצחת. זה מאפשר override לפי פרויקט.
+**ברמה גלובלית** — agents שזמינים בכל פרויקט:
+```
+~/.kiro/agents/
+├── commit-helper.json
+└── code-explainer.json
+```
 
-### מה ההבדל בין Skill ל-CLAUDE.md?
+### מה ההבדל בין Custom Agent ל-Steering?
 
-**CLAUDE.md:**
+**Steering (`.kiro/steering/*.md`):**
 
-- **מתי נטען:** תמיד, בכל שיחה
-- **מטרה:** הנחיות כלליות לפרויקט
+- **מתי נטען:** תמיד, בכל סשן
+- **מטרה:** הנחיות כלליות לפרויקט (stack, conventions, מה לא לעשות)
 - **דוגמה:** "השתמש ב-TypeScript, כתוב tests"
 - **אנלוגיה:** מדריך עובד חדש
 
-**Skill:**
+**Custom Agent:**
 
-- **מתי נטען:** רק כשמפעילים את הפקודה
-- **מטרה:** משימה ספציפית ומוגדרת
-- **דוגמה:** "/pr-review — בדוק את ה-PR הנוכחי"
-- **אנלוגיה:** צ'קליסט למשימה ספציפית
+- **מתי נטען:** רק כשמפעילים את ה-agent הספציפי
+- **מטרה:** משימה ספציפית ומוגדרת, עם כלים והרשאות מותאמים
+- **דוגמה:** pr-reviewer — עושה review לפי checklist קבוע, עם הרשאות קריאה בלבד
+- **אנלוגיה:** מומחה שמזמינים למשימה מסוימת
 
-## אנטומיה של Skill
+## אנטומיה של Custom Agent
 
 ### מבנה הקובץ
 
-קובץ skill הוא Markdown פשוט עם מבנה מוגדר:
+קובץ agent הוא JSON עם השדות המרכזיים הבאים:
 
-```markdown
-Description that appears in autocomplete when typing /command
-
----
-
-The rest of the file is the prompt/instructions that Claude follows
-when the skill is invoked. You can write anything here — it's just
-a prompt that gets injected into the conversation.
+```json
+{
+  "name": "pr-reviewer",
+  "description": "Reviews the current branch changes as a thorough code reviewer",
+  "prompt": "You are an experienced code reviewer. When asked to review...",
+  "tools": ["read", "shell"],
+  "allowedTools": ["read"],
+  "resources": ["file://README.md", "file://.kiro/steering/*.md"]
+}
 ```
 
-- **שורה ראשונה** — תיאור קצר שמופיע ב-autocomplete כשמתחילים להקליד `/`
-- **שאר הקובץ** — ההוראות שClaude Code מקבל כשמפעילים את הפקודה
-- **שם הקובץ** — הופך לשם הפקודה (בלי `.md`)
+- **`name`** — שם ה-agent (כך מפעילים אותו)
+- **`description`** — תיאור קצר; עוזר לכם (ולעמיתים) להבין מה ה-agent עושה
+- **`prompt`** — ההוראות הקבועות של ה-agent. זה הלב: כאן כותבים את ה-workflow המלא
+- **`tools`** — אילו כלים זמינים ל-agent בכלל
+- **`allowedTools`** — אילו כלים מאושרים **אוטומטית** בלי לשאול. כלי שנמצא ב-`tools` אבל לא כאן — ידרוש אישור ידני
+- **`resources`** — קבצים שנטענים ל-context של ה-agent מראש
 
-### Placeholders
+!!! tip "ההבדל בין tools ל-allowedTools"
+    זו הפרדה חשובה: `tools` קובע מה ה-agent *יכול* לעשות, `allowedTools` קובע מה הוא יכול לעשות *בלי לבקש אישור*. ל-agent של review תנו `shell` ב-tools (כדי שיוכל להריץ `git diff`) אבל אל תוסיפו אותו ל-allowedTools — כך כל פקודה תוצג לכם לאישור.
 
-אפשר להשתמש ב-`$ARGUMENTS` כדי לקבל input מהמשתמש:
+### יצירה: שתי דרכים
 
-```markdown
-Create a new React component with the given name
+**דרך 1 — AI-assisted (מומלץ להתחלה):** מתוך סשן של Kiro CLI:
 
----
-
-Create a new React component called $ARGUMENTS.
-
-The component should:
-1. Be a functional component with TypeScript
-2. Have a corresponding test file
-3. Have a Storybook story
-4. Use CSS Modules for styling
+```
+> /agent create pr-reviewer -D "Reviews branch changes before PR"
 ```
 
-שימוש:
-```
-/component UserProfile
-```
+Kiro ייצור תצורה מלאה על בסיס התיאור, ותוכלו לערוך אותה אחר כך.
 
-Claude Code יחליף את `$ARGUMENTS` ב-`UserProfile` ויפעל לפי ההוראות.
+**דרך 2 — ידנית:** צרו את קובץ ה-JSON בעצמכם ב-`.kiro/agents/` (הוסיפו `--manual` לפקודה, או פשוט כתבו את הקובץ ידנית).
 
-### דוגמה מלאה — Skill ראשון
-
-ניצור skill פשוט שעושה commit חכם. צרו את הקובץ `.claude/skills/commit.md`:
-
-```markdown
-Create a well-structured git commit for the current changes
-
----
-
-Look at the current git diff (both staged and unstaged changes).
-
-Follow these steps:
-1. Run `git diff` and `git diff --cached` to see all changes
-2. Analyze what changed and why
-3. Stage the relevant files (use `git add` with specific files, not `-A`)
-4. Write a commit message following Conventional Commits format:
-   - feat: for new features
-   - fix: for bug fixes
-   - refactor: for refactoring
-   - docs: for documentation
-   - test: for tests
-   - chore: for maintenance
-5. The commit message should have:
-   - A short subject line (max 72 chars)
-   - A blank line
-   - A body explaining WHAT changed and WHY
-6. Show me the commit message before committing and ask for approval
-7. Create the commit
-
-Important:
-- Never use `git add -A` or `git add .`
-- Never commit .env files or secrets
-- If there are unrelated changes, suggest splitting into multiple commits
-```
-
-עכשיו אפשר פשוט להקליד `/commit` ו-Claude Code ידע בדיוק מה לעשות.
-
-## תרגיל מעשי 1: התקנה ושימוש ב-Skills מוכנים (15 דקות)
-
-### שלב 1 — יצירת תיקיית skills
+### הפעלה
 
 ```bash
-mkdir -p .claude/skills
+# פתיחת סשן עם ה-agent
+kiro-cli --agent pr-reviewer
+
+# או החלפת agent בתוך סשן פעיל
+> /agent swap
 ```
 
-### שלב 2 — התקנת skill מוכן
+`/agent swap` פותח תפריט בחירה מכל ה-agents הזמינים — של הפרויקט ושלכם.
 
-צרו את הקובץ `.claude/skills/pr-review.md`:
+### דוגמה מלאה — Agent ראשון
 
-```markdown
-Review the current branch's changes as a thorough code reviewer
+ניצור agent שעושה commits חכמים. צרו את הקובץ `.kiro/agents/commit-helper.json`:
 
----
-
-You are an experienced code reviewer. Review the current branch's changes.
-
-Steps:
-1. Run `git diff main...HEAD` to see all changes in this branch
-2. Run `git log main..HEAD --oneline` to see the commit history
-3. For each changed file, analyze:
-   - Code quality and readability
-   - Potential bugs or edge cases
-   - Performance implications
-   - Security concerns
-   - Test coverage
-
-Provide your review in this format:
-
-## Summary
-Brief overview of what this PR does.
-
-## Issues Found
-List any problems, ordered by severity:
-- 🔴 Critical: ...
-- 🟡 Warning: ...
-- 🔵 Suggestion: ...
-
-## Good Things
-What's done well in this PR.
-
-## Questions
-Things you'd ask the author about.
+```json
+{
+  "name": "commit-helper",
+  "description": "Creates well-structured git commits for the current changes",
+  "prompt": "You are a git commit assistant. When the user asks you to commit:\n1. Run `git diff` and `git diff --cached` to see all changes\n2. Analyze what changed and why\n3. Stage the relevant files (use `git add` with specific files, never `-A` or `.`)\n4. Write a commit message in Conventional Commits format (feat/fix/refactor/docs/test/chore)\n5. The message must have: a subject line (max 72 chars), a blank line, and a body explaining WHAT changed and WHY\n6. Show the commit message and ask for approval BEFORE committing\n7. Never commit .env files or secrets\n8. If there are unrelated changes, suggest splitting into multiple commits",
+  "tools": ["read", "shell"],
+  "allowedTools": ["read"]
+}
 ```
 
-### שלב 3 — שימוש ב-skill
+עכשיו מפעילים:
 
-פתחו Claude Code ונסו:
-
-```
-/pr-review
-```
-
-או:
-
-```
-/commit
+```bash
+kiro-cli --agent commit-helper
+> תעשה commit לשינויים הנוכחיים
 ```
 
-!!! tip "Autocomplete"
-    כשמתחילים להקליד `/` ב-Claude Code, תראו רשימה של כל ה-skills הזמינים עם התיאור מהשורה הראשונה. זה עוזר לגלות skills שעמיתים לצוות הוסיפו.
+ה-agent יודע בדיוק מה לעשות — וכל פקודת `git` תוצג לכם לאישור, כי `shell` לא נמצא ב-`allowedTools`.
 
-!!! example "מה לצפות כשמריצים `/commit`"
-    כשמקלידים `/commit` ב-Claude Code, זה מה שקורה:
+## תרגיל מעשי 1: agent מוכן ראשון (15 דקות)
 
-    1. Claude Code קורא את התיאור ואת ההוראות מ-`commit.md`
-    2. הוא מריץ `git diff` ו-`git diff --cached` לראות את השינויים
-    3. הוא מנתח מה השתנה ומציע הודעת commit
-    4. הוא מציג את ההודעה ו**מבקש אישור** לפני ביצוע ה-commit
-    5. אחרי אישור — מריץ `git add` ו-`git commit`
+### שלב 1 — יצירת תיקיית agents
 
-    אם יש שגיאה (למשל אין שינויים, או קונפליקט) — Claude Code ידווח עליה ויציע פתרון.
-
-## תרגיל מעשי 2: בניית Skill מותאם אישית (30 דקות)
-
-### דוגמה 1: `/deploy-check` — בדיקת מוכנות ל-deploy
-
-צרו `.claude/skills/deploy-check.md`:
-
-```markdown
-Verify the project is ready for deployment
-
----
-
-Perform a comprehensive deployment readiness check.
-
-Run the following checks and report results:
-
-### 1. Tests
-- Run the test suite (`npm test` or the project's test command)
-- Report: pass/fail count, any flaky tests
-
-### 2. Code Quality
-- Search for TODO, FIXME, HACK, XXX comments: `grep -rn "TODO\|FIXME\|HACK\|XXX" src/`
-- Report how many were found and in which files
-
-### 3. Environment Variables
-- Read `.env.example` (or `.env.template`)
-- Check that all required env vars are documented
-- Verify no secrets are hardcoded in source files (search for patterns like API_KEY=, password=, secret= in code files)
-
-### 4. Dependencies
-- Check for outdated dependencies: `npm outdated` (or equivalent)
-- Check for security vulnerabilities: `npm audit` (or equivalent)
-
-### 5. Build
-- Run the build command and verify it succeeds
-- Check that the build output looks reasonable (not empty, no errors)
-
-### 6. Git Status
-- Verify working directory is clean
-- Verify we're on the right branch
-- Check if branch is up to date with remote
-
-Present results as a checklist:
-- ✅ or ❌ for each check
-- Details for any failures
-- Overall verdict: READY TO DEPLOY or NOT READY (with reasons)
+```bash
+mkdir -p .kiro/agents
 ```
 
-### דוגמה 2: `/component` — scaffold של React component
+### שלב 2 — התקנת agent מוכן
 
-צרו `.claude/skills/component.md`:
+צרו את הקובץ `.kiro/agents/pr-reviewer.json`:
 
-```markdown
-Scaffold a new React component with tests and stories
-
----
-
-Create a new React component called $ARGUMENTS.
-
-Create the following file structure:
-```
-src/components/$ARGUMENTS/
-├── $ARGUMENTS.tsx          # The component
-├── $ARGUMENTS.test.tsx     # Tests
-├── $ARGUMENTS.stories.tsx  # Storybook story
-├── $ARGUMENTS.module.css   # CSS Module styles
-└── index.ts               # Re-export
+```json
+{
+  "name": "pr-reviewer",
+  "description": "Reviews the current branch's changes as a thorough code reviewer",
+  "prompt": "You are an experienced code reviewer. When asked to review:\n\n1. Run `git diff main...HEAD` to see all changes in this branch\n2. Run `git log main..HEAD --oneline` to see the commit history\n3. For each changed file, analyze: code quality and readability, potential bugs or edge cases, performance implications, security concerns, test coverage\n\nProvide your review in this format:\n\n## Summary\nBrief overview of what this PR does.\n\n## Issues Found\nList problems ordered by severity:\n- 🔴 Critical\n- 🟡 Warning\n- 🔵 Suggestion\n\n## Good Things\nWhat's done well.\n\n## Questions\nThings you'd ask the author about.",
+  "tools": ["read", "shell"],
+  "allowedTools": ["read"]
+}
 ```
 
-### Component file ($ARGUMENTS.tsx):
-- Functional component with TypeScript
-- Props interface exported separately
-- Use CSS Modules for styling
-- Include JSDoc comment with description
-- Follow existing component patterns in the project
+### שלב 3 — שימוש
 
-### Test file ($ARGUMENTS.test.tsx):
-- Use React Testing Library
-- Include tests for:
-  - Component renders without crashing
-  - Props are applied correctly
-  - User interactions work
-  - Accessibility (role, aria attributes)
+פתחו פרויקט עם branch פעיל ונסו:
 
-### Storybook story ($ARGUMENTS.stories.tsx):
-- Default story with minimal props
-- Story with all props populated
-- Interactive story if applicable
+```bash
+kiro-cli --agent pr-reviewer
+> תעשה review לשינויים ב-branch הנוכחי
+```
 
-### CSS Module ($ARGUMENTS.module.css):
-- Base container class
-- Responsive breakpoints if needed
+!!! example "מה לצפות"
+    ה-agent יריץ `git diff` (ויבקש אישור, כי `shell` לא מאושר אוטומטית), ינתח את השינויים, ויחזיר review מובנה לפי הפורמט שהגדרתם ב-prompt. אם אין שינויים ב-branch — הוא ידווח על זה ויציע איך להמשיך.
 
-### Index file (index.ts):
-- Re-export component and props interface
+## תרגיל מעשי 2: בניית Agent מותאם אישית (30 דקות)
 
-Before creating files:
-1. Check the existing component structure in the project for conventions
-2. Look at existing tests and stories for patterns
-3. Adapt to the project's style (styled-components vs CSS Modules, etc.)
+### דוגמה 1: `deploy-checker` — בדיקת מוכנות ל-deploy
+
+צרו `.kiro/agents/deploy-checker.json`:
+
+```json
+{
+  "name": "deploy-checker",
+  "description": "Verifies the project is ready for deployment",
+  "prompt": "Perform a comprehensive deployment readiness check. Run these checks and report results:\n\n1. TESTS: Run the test suite (npm test or the project's test command). Report pass/fail count.\n2. CODE QUALITY: Search for TODO, FIXME, HACK, XXX comments in src/. Report count and files.\n3. ENV VARS: Read .env.example if it exists. Verify no secrets are hardcoded in source files (search for API_KEY=, password=, secret= patterns).\n4. DEPENDENCIES: Run npm outdated and npm audit. Summarize findings.\n5. BUILD: Run the build command and verify it succeeds.\n6. GIT: Verify working directory is clean and branch is up to date with remote.\n\nPresent results as a checklist with ✅/❌ per check, details for failures, and an overall verdict: READY TO DEPLOY or NOT READY (with reasons).",
+  "tools": ["read", "shell"],
+  "allowedTools": ["read"]
+}
 ```
 
 שימוש:
 
+```bash
+kiro-cli --agent deploy-checker
+> תבדוק אם הפרויקט מוכן ל-deploy
 ```
-/component UserAvatar
-```
 
-### דוגמה 3: `/db-migration` — יצירת migration
+### דוגמה 2: `db-migrator` — יצירת migrations
 
-צרו `.claude/skills/db-migration.md`:
+צרו `.kiro/agents/db-migrator.json`:
 
-```markdown
-Create a new database migration file
-
----
-
-Create a new database migration for: $ARGUMENTS
-
-Steps:
-1. Check the existing migrations directory to understand:
-   - Naming convention (timestamp-based, sequential, etc.)
-   - File format (SQL, TypeScript, JavaScript)
-   - Which migration tool is used (knex, prisma, typeorm, drizzle, etc.)
-
-2. Generate the correct filename:
-   - If timestamp-based: use current timestamp (YYYYMMDDHHMMSS_description.ts)
-   - If sequential: use next number in sequence
-   - Use snake_case for the description part
-
-3. Create the migration file with:
-   - `up` function: applies the migration
-   - `down` function: reverts the migration
-   - Proper types and imports matching existing migrations
-   - Comments explaining what this migration does
-
-4. If using Prisma:
-   - Update the schema.prisma file instead
-   - Run `npx prisma generate` after changes
-   - Suggest running `npx prisma migrate dev --name description`
-
-5. Show me the migration file and ask for confirmation before saving.
-
-Important:
-- Always match the existing migration style exactly
-- Include proper error handling in up/down functions
-- For destructive operations (dropping tables/columns), add a warning comment
-- Never auto-run the migration — just create the file
+```json
+{
+  "name": "db-migrator",
+  "description": "Creates database migration files following project conventions",
+  "prompt": "You create database migrations. When asked to create a migration:\n\n1. Check the existing migrations directory to understand: naming convention (timestamp/sequential), file format (SQL/TS/JS), and which migration tool is used (knex, prisma, typeorm, drizzle)\n2. Generate the correct filename matching the existing convention\n3. Create the migration with: an `up` function, a `down` function, proper types and imports matching existing migrations, and comments explaining what it does\n4. If using Prisma: update schema.prisma instead, and suggest the prisma migrate command\n5. Show the migration file and ask for confirmation before saving\n\nRules: Always match the existing migration style exactly. For destructive operations (dropping tables/columns), add a warning comment. NEVER auto-run the migration — just create the file.",
+  "tools": ["read", "write"],
+  "allowedTools": ["read"]
+}
 ```
 
 שימוש:
 
+```bash
+kiro-cli --agent db-migrator
+> תיצור migration שמוסיף עמודת email_verified לטבלת users
 ```
-/db-migration add email_verified column to users table
-```
 
-### עכשיו אתם — בנו skill משלכם! (15 דקות)
+שימו לב: ל-agent הזה יש `write` (הוא צריך ליצור קובץ) אבל אין לו `shell` בכלל — הוא פיזית לא יכול להריץ את ה-migration.
 
-חשבו על תהליך עבודה חוזר שאתם עושים ובנו skill עבורו. כמה רעיונות:
+### עכשיו אתם — בנו agent משלכם! (15 דקות)
 
-- `/api-endpoint` — scaffold של endpoint חדש (route, controller, validation, test)
-- `/bug-investigate` — חקירת באג (קריאת logs, חיפוש בקוד, הצעת fix)
-- `/release-notes` — יצירת release notes מ-git log
-- `/code-review-prep` — הכנת הקוד שלכם ל-review (lint, format, self-review)
-- `/env-setup` — הגדרת סביבת פיתוח חדשה עם כל הכלים
+חשבו על תהליך עבודה חוזר שאתם עושים ובנו agent עבורו. כמה רעיונות:
 
-### תרגיל מעשי 3: debugging של Skill (15 דקות)
+- `api-scaffolder` — יצירת endpoint חדש (route, controller, validation, test) לפי תבנית הפרויקט
+- `bug-investigator` — חקירת באג (קריאת logs, חיפוש בקוד, הצעת fix) — read-only!
+- `release-noter` — יצירת release notes מ-git log
+- `test-writer` — כתיבת tests לקוד לא מכוסה, לפי דפוסי הבדיקות הקיימים
+- `onboarding-guide` — agent שעונה על שאלות של מפתחים חדשים על ה-codebase (read-only)
 
-מה קורה כש-skill לא עובד כמצופה? נסו את התרחישים הבאים:
+**חובה לכלול:**
 
-1. **Skill עם נתיב שגוי:** צרו skill שמנסה לקרוא קובץ שלא קיים. מה Claude Code עושה?
-2. **Skill עם פקודה שנכשלת:** צרו skill שמריץ `npm test` בפרויקט בלי tests. איך Claude Code מגיב?
-3. **Skill בלי `$ARGUMENTS`:** מה קורה כשמפעילים `/component` בלי לתת שם?
+1. `prompt` עם workflow מסודר בשלבים
+2. `tools` מינימליים — רק מה שה-agent באמת צריך
+3. `allowedTools` מצומצם עוד יותר — פעולות מסוכנות דורשות אישור
+
+### תרגיל מעשי 3: debugging של Agent (15 דקות)
+
+מה קורה כש-agent לא עובד כמצופה? נסו את התרחישים הבאים:
+
+1. **Agent עם כלים חסרים:** הסירו את `shell` מ-`tools` של pr-reviewer ובקשו review. מה קורה כשה-agent מנסה להריץ `git diff`?
+2. **Agent עם prompt מעורפל:** שנו את ה-prompt ל-"do a good review" בלבד. השוו את איכות התוצאה לגרסה המפורטת
+3. **בדיקת precedence:** צרו agent עם אותו שם גם ב-`.kiro/agents/` וגם ב-`~/.kiro/agents/` עם prompts שונים. איזה מהם נטען?
 
 !!! warning "פתרון בעיות נפוצות"
-    **הפקודה לא מופיעה ב-autocomplete:**
+    **ה-agent לא מופיע ב-`/agent swap`:**
 
-    - וודאו שהקובץ נמצא ב-`.claude/skills/` (לא ב-`.claude/` ישירות)
-    - וודאו שסיומת הקובץ היא `.md`
-    - הפעילו מחדש את Claude Code
+    - וודאו שהקובץ נמצא ב-`.kiro/agents/` (או `~/.kiro/agents/`) עם סיומת `.json`
+    - וודאו שה-JSON תקין (הריצו `cat file.json | npx json5` או הדביקו ב-validator)
+    - וודאו שיש שדה `name` ושהוא תואם למה שאתם מקלידים
 
-    **Claude Code מתעלם מההוראות:**
+    **ה-agent מתעלם מההוראות:**
 
-    - ההוראות צריכות להיות ברורות ואימפרטיביות ("הרץ X", "צור Y")
-    - הימנעו מהוראות סותרות עם CLAUDE.md
-    - פשטו — skill שעושה דבר אחד טוב > skill שעושה 10 דברים בינוניים
+    - ההוראות ב-`prompt` צריכות להיות ברורות ואימפרטיביות ("Run X", "Never do Y")
+    - הימנעו מהוראות שסותרות את קבצי ה-steering של הפרויקט
+    - פשטו — agent שעושה דבר אחד טוב עדיף על agent שעושה 10 דברים בינוניים
 
-    **`$ARGUMENTS` לא מוחלף:**
+    **ה-agent מבקש אישור על כל פעולה:**
 
-    - וודאו שכתבתם `$ARGUMENTS` באותיות גדולות
-    - המשתנה מוחלף רק אם המשתמש נתן input אחרי הפקודה
+    - בדקו את `allowedTools` — כלים שלא מופיעים שם דורשים אישור ידני
+    - זו התנהגות רצויה לפעולות מסוכנות; הוסיפו ל-allowedTools רק כלים בטוחים (read)
 
 ## דפוסים מתקדמים
 
-### Skills שקוראים לכלים
+### Agent עם MCP servers משלו
 
-Skill יכול להנחות את Claude Code להשתמש בכלים חיצוניים:
+Custom agent יכול להגדיר אילו שרתי MCP זמינים לו — בנפרד מההגדרות הכלליות:
 
-```markdown
-Analyze test coverage and suggest improvements
-
----
-
-1. Run the test suite with coverage: `npm test -- --coverage`
-2. Read the coverage report
-3. Identify files with less than 80% coverage
-4. For each under-covered file:
-   a. Read the file
-   b. Identify untested code paths
-   c. Write the missing tests
-5. Re-run coverage to verify improvement
+```json
+{
+  "name": "github-manager",
+  "description": "Manages GitHub issues and PRs",
+  "prompt": "You manage GitHub workflows...",
+  "tools": ["read"],
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
+    }
+  },
+  "includeMcpJson": false
+}
 ```
 
-### Skills עם multi-step workflows
+`includeMcpJson: false` אומר: אל תטען את שרתי ה-MCP הכלליים — רק את מה שמוגדר כאן. זה נותן ל-agent סביבה נקייה וממוקדת.
 
-Skill יכול להגדיר תהליך מורכב עם נקודות החלטה:
+### Agent שאוכף conventions של הצוות
 
-```markdown
-Set up a complete CI/CD pipeline for this project
+אחד השימושים החזקים ביותר — agent שבודק שקוד חדש עומד בסטנדרטים:
 
----
-
-Analyze the project and set up an appropriate CI/CD pipeline.
-
-### Phase 1: Analysis
-- Detect the project type (Node.js, Python, Go, etc.)
-- Identify the package manager
-- Find existing test and build commands
-- Check if there's already a CI config
-
-### Phase 2: Create Pipeline
-Based on the analysis, create a GitHub Actions workflow that:
-
-**On Pull Request:**
-- Install dependencies
-- Run linting
-- Run tests
-- Build the project
-- Comment on PR with results
-
-**On Push to main:**
-- All of the above
-- Deploy (ask the user where: Vercel, AWS, GCP, etc.)
-
-### Phase 3: Verify
-- Validate the workflow YAML syntax
-- Dry-run the commands locally to verify they work
-- Create a summary of what was set up
-
-Ask the user for confirmation before creating any files.
+```json
+{
+  "name": "convention-checker",
+  "description": "Checks that current changes follow team conventions",
+  "prompt": "Review the current git diff against our team conventions:\n\nNAMING: Components PascalCase, utility files kebab-case, variables camelCase (no abbreviations), constants UPPER_SNAKE_CASE.\n\nSTRUCTURE: No file longer than 300 lines. No function longer than 50 lines. Max 3 levels of nesting. All exported functions have JSDoc.\n\nGIT: Branch name follows type/TICKET-123-description. Commits use Conventional Commits.\n\nTESTING: Every new function has at least one test. No .skip in committed tests.\n\nRun `git diff`, check every rule, and report violations with file and line references.",
+  "tools": ["read", "shell"],
+  "allowedTools": ["read"],
+  "resources": ["file://.kiro/steering/*.md"]
+}
 ```
 
-### Skills שאוכפים conventions של הצוות
+שימו לב ל-`resources`: ה-agent טוען את קבצי ה-steering של הפרויקט מראש, כך שהוא מכיר גם את הכללים הכלליים.
 
-אחד השימושים החזקים ביותר — skill שמוודא שקוד חדש עומד בסטנדרטים:
+!!! warning "Custom agents לא מחליפים CI"
+    Agents רצים מקומית ותלויים בשיתוף פעולה של המפתח. הם מצוינים כ-"first line of defense", אבל אל תסמכו עליהם כתחליף לבדיקות אוטומטיות ב-CI/CD.
 
-```markdown
-Check that code follows our team conventions
-
----
-
-Review the current changes against our team conventions:
-
-### Naming
-- Components: PascalCase
-- Files: kebab-case for utilities, PascalCase for components
-- Variables: camelCase, no abbreviations
-- Constants: UPPER_SNAKE_CASE
-
-### Code Structure
-- No file longer than 300 lines
-- No function longer than 50 lines
-- Maximum 3 levels of nesting
-- All exported functions must have JSDoc comments
-
-### Git
-- Branch name follows pattern: type/TICKET-123-description
-- All commits use Conventional Commits format
-- PR has less than 400 changed lines (suggest splitting if larger)
-
-### Testing
-- Every new function has at least one test
-- Test file name matches source file name
-- No skipped tests (.skip) in committed code
-
-Check the current `git diff` against these rules and report violations.
-```
-
-!!! warning "Skills לא מחליפים CI"
-    Skills רצים מקומית ותלויים בשיתוף פעולה של המפתח. הם מצוינים כ-"first line of defense" אבל אל תסמכו עליהם כתחליף לבדיקות אוטומטיות ב-CI/CD.
-
-## שיתוף Skills בצוות
+## שיתוף Agents בצוות
 
 ### דרך Git
 
-כי skills שבתיקיית `.claude/skills/` הם חלק מהפרויקט, הם נשמרים ב-Git אוטומטית:
+כי agents שבתיקיית `.kiro/agents/` הם חלק מהפרויקט, הם נשמרים ב-Git אוטומטית:
 
 ```bash
-git add .claude/skills/
-git commit -m "feat: add team coding skills for Claude Code"
+git add .kiro/agents/
+git commit -m "feat: add team custom agents for Kiro CLI"
 git push
 ```
 
-כל מי שעושה `git pull` מקבל את ה-skills.
+כל מי שעושה `git pull` מקבל את ה-agents — והם עובדים גם ב-Kiro IDE וגם ב-CLI.
 
 ### Best Practices
 
-1. **תיעוד** — כתבו תיאור ברור בשורה הראשונה של כל skill
-2. **בדיקה** — נסו את ה-skill כמה פעמים לפני שמשתפים
-3. **גרסאות** — עדכנו skills כשקונבנציות הצוות משתנות
-4. **ספציפיות** — skill טוב עושה דבר אחד ועושה אותו טוב
-5. **הגנתיות** — תמיד בקשו אישור לפני פעולות הרסניות (מחיקה, push, deploy)
+1. **תיעוד** — כתבו `description` ברור לכל agent
+2. **בדיקה** — נסו את ה-agent כמה פעמים לפני שמשתפים
+3. **גרסאות** — עדכנו agents כשקונבנציות הצוות משתנות
+4. **ספציפיות** — agent טוב עושה דבר אחד ועושה אותו טוב
+5. **הגנתיות** — allowedTools מינימלי; פעולות הרסניות (מחיקה, push, deploy) תמיד דורשות אישור
 
 ## שאלות לדיון
 
-1. אילו תהליכי עבודה חוזרים בצוות שלכם מתאימים להפוך ל-skills?
-2. איך skills משתלבים עם CLAUDE.md? מתי תשתמשו בכל אחד?
-3. מה הסיכון ב-skill שמריץ פקודות אוטומטית? איך מצמצמים?
-4. איך skills יכולים לעזור ב-onboarding של מפתחים חדשים לצוות?
+1. אילו תהליכי עבודה חוזרים בצוות שלכם מתאימים להפוך ל-custom agents?
+2. איך custom agents משתלבים עם steering files? מתי תשתמשו בכל אחד?
+3. מה הסיכון ב-agent עם `shell` ב-allowedTools? מתי בכל זאת הייתם מאשרים את זה?
+4. איך custom agents יכולים לעזור ב-onboarding של מפתחים חדשים לצוות?
 
 ## נקודות מפתח
 
-- Skills הם **custom slash commands** — קבצי Markdown עם הוראות שClaude Code מבצע
-- שם הקובץ הוא שם הפקודה: `pr-review.md` → `/pr-review`
-- שני מיקומים: `.claude/skills/` (פרויקט) ו-`~/.claude/skills/` (גלובלי)
-- `$ARGUMENTS` מאפשר לקבל input מהמשתמש
-- skills של פרויקט נשמרים ב-Git ומשותפים לכל הצוות
-- skill טוב עושה **דבר אחד** ועושה אותו טוב — כמו פונקציה
-- השורה הראשונה היא התיאור שמופיע ב-autocomplete — כתבו אותה בקפידה
-- skills לא מחליפים CI/CD — הם "קו הגנה ראשון" שרץ מקומית
+- **Custom Agents** הם תצורות שמורות של agent — הוראות + כלים + הרשאות בקובץ JSON אחד
+- הפעלה: `kiro-cli --agent <name>` או `/agent swap` בתוך סשן; יצירה: `/agent create`
+- שני מיקומים: `.kiro/agents/` (פרויקט, משותף ב-Git) ו-`~/.kiro/agents/` (גלובלי)
+- **`tools` לעומת `allowedTools`** — מה ה-agent יכול לעשות, לעומת מה שמאושר לו אוטומטית. זה הבסיס ל-least privilege
+- **Steering = הנחיות קבועות לכל סשן; Custom Agent = מומחה למשימה ספציפית**
+- agent טוב עושה **דבר אחד** ועושה אותו טוב — כמו פונקציה
+- ההפרדה בין agents עם הרשאות שונות היא בדיוק הרעיון שנרחיב במודול 10 — Sub-Agents
